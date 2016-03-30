@@ -10,15 +10,18 @@ let letter = [%sedlex.regexp? 'a'..'z' | 'A'..'Z']
 let digit = [%sedlex.regexp? '0'..'0']
 let number = [%sedlex.regexp? Plus digit]
 
+let p s b = Printf.printf s (Sedlexing.Utf8.lexeme b);;
 
 let rec token buf =
   match%sedlex buf with
-  | letter, Star letter -> Printf.printf "Atom %s\n" (Sedlexing.Latin1.lexeme buf); token buf
+  | white_space -> token buf
+  | letter, Star letter -> p "Atom %s\n" buf; token buf
+  | '(' -> p "LParen %s\n" buf; token buf
+  | ')' -> p "RParen %s\n" buf; token buf
   | eof -> print_endline "EOF"
   | _ -> failwith "Lexer error: Unexpected character"
 
 let () =
-  let lexbuf = Sedlexing.Latin1.from_string ex_atom2 in
+  let lexbuf = Sedlexing.Utf8.from_string ex_list_nested in
   token lexbuf
 ;;
-
