@@ -10,12 +10,14 @@ let letter = [%sedlex.regexp? 'a'..'z' | 'A'..'Z']
 let digit = [%sedlex.regexp? '0'..'0']
 let number = [%sedlex.regexp? Plus digit]
 
+let atom = [%sedlex.regexp? letter, Star letter]
+
 let p s b = Printf.printf s (Sedlexing.Utf8.lexeme b);;
 
 let rec token buf =
   match%sedlex buf with
   | white_space -> token buf
-  | letter, Star letter -> p "Atom %s\n" buf; token buf
+  | atom -> p "Atom %s\n" buf; token buf
   | '(' -> p "LParen %s\n" buf; token buf
   | ')' -> p "RParen %s\n" buf; token buf
   | eof -> print_endline "EOF"
