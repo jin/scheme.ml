@@ -15,6 +15,22 @@ type token =
   LParen | RParen |
   EOF
 
+(* S-expression type definition *)
+type sexp = Atom of token | List of sexp list
+
+(* Lexer exceptions *)
+exception Lexer_exn of string
+exception Unexpected_character of string
+exception Parantheses_mismatch
+
+(* Parser exceptions *)
+exception Parser_exn of string
+exception Incorrect_argument_count
+
+(* Evaluation exceptions *)
+exception Eval_exn of string
+exception Not_function
+
 let string_of_token token =
   match token with
   | Symbol s -> s
@@ -33,10 +49,7 @@ let boolean_of_string s =
   match s with
   | "#t" -> true
   | "#f" -> false
-  | _ -> failwith "Not a boolean"
-
-(* S-expression type definition *)
-type sexp = Atom of token | List of sexp list
+  | _ -> false
 
 let string_of_tokens tokens =
   "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
@@ -60,13 +73,14 @@ let rec tokenize buf tokens =
   | '(' -> tokenize buf (tokens@[LParen])
   | ')' -> tokenize buf (tokens@[RParen])
   | eof -> tokens
-  | _ -> failwith "Lexer error: Unexpected character"
+  | any -> raise (Unexpected_character (lexeme buf))
+  | _ -> raise (Unexpected_character "Unrecognized character")
 
 (* Convert a list of tokens into an s-expression *)
 let parse_to_sexp (tokens: token list) =
   let rec sexp_of_list tokens sexpr =
     match tokens with
-    | [] -> failwith "Missing matching parenthesis"
+    | [] -> raise Parantheses_mismatch
     | RParen::rem_tokens -> (List sexpr, rem_tokens)
     | LParen::rem_tokens ->
       let (nested_list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
@@ -97,9 +111,9 @@ let rec eval sexpr =
           | (Multiply, [Number a; Number b]) -> Number (a * b)
           | (Divide, [Number a; Number b]) -> Number (a / b)
           | (Modulo, [Number a; Number b]) -> Number (a mod b)
-          | _ -> failwith "Binary op not implemented"
+          | _ -> raise (Parser_exn "Binary op not implemented")
         end 
-      | _ -> failwith "Incorrect number of arguments"
+      | _ -> raise Incorrect_argument_count
     end in
 
   match sexpr with
@@ -107,13 +121,13 @@ let rec eval sexpr =
   | List x ->
     begin
       match (List.hd x, List.tl x) with
-      | (List _, _) -> failwith "First element of list should not be a List"
+      | (List _, _) -> raise Not_function 
       | (Atom op, args) ->
         let operands = List.map eval args in
         begin
           match op with
           | Plus | Minus | Multiply | Divide | Modulo -> eval_binary_op op operands
-          | _ -> failwith "TBI"
+          | _ -> raise (Parser_exn "TBI")
         end
     end
 
