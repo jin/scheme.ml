@@ -8,7 +8,7 @@ let ident = [%sedlex.regexp? letter, Star letter]
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
 type token =
-  Ident of string |
+  Symbol of string |
   Number of int |
   Boolean of bool |
   Plus | Minus | Divide | Multiply | Modulo |
@@ -17,7 +17,7 @@ type token =
 
 let string_of_token token =
   match token with
-  | Ident s -> s
+  | Symbol s -> s
   | Number s -> (string_of_int s)
   | Boolean s -> (string_of_bool s)
   | LParen -> "LParen"
@@ -51,7 +51,7 @@ let rec tokenize buf tokens =
   | white_space -> tokenize buf tokens
   | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
   | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
-  | ident -> tokenize buf (tokens@[Ident (lexeme buf)])
+  | ident -> tokenize buf (tokens@[Symbol (lexeme buf)])
   | '+' -> tokenize buf (tokens@[Plus])
   | '-' -> tokenize buf (tokens@[Minus])
   | '/' -> tokenize buf (tokens@[Divide])
@@ -86,14 +86,21 @@ let parse_to_sexp (tokens: token list) =
 
 let rec eval sexpr =
 
-  let eval_binary_op op a b =
-    match (op, a, b) with
-    | (Plus, Number a, Number b) -> Number (a + b)
-    | (Minus, Number a, Number b) -> Number (a - b)
-    | (Multiply, Number a, Number b) -> Number (a * b)
-    | (Divide, Number a, Number b) -> Number (a / b)
-    | (Modulo, Number a, Number b) -> Number (a mod b)
-    | _ -> failwith "Binary op not implemented" in
+  let eval_binary_op op operands =
+    begin 
+      match operands with
+      | [Number a; Number b] ->   
+        begin
+          match (op, operands) with
+          | (Plus, [Number a; Number b]) -> Number (a + b)
+          | (Minus, [Number a; Number b]) -> Number (a - b)
+          | (Multiply, [Number a; Number b]) -> Number (a * b)
+          | (Divide, [Number a; Number b]) -> Number (a / b)
+          | (Modulo, [Number a; Number b]) -> Number (a mod b)
+          | _ -> failwith "Binary op not implemented"
+        end 
+      | _ -> failwith "Incorrect number of arguments"
+    end in
 
   match sexpr with
   | Atom x -> x
@@ -105,9 +112,7 @@ let rec eval sexpr =
         let operands = List.map eval args in
         begin
           match op with
-          | Plus | Minus | Multiply | Divide | Modulo ->
-            if (List.length operands != 2) then failwith "Invalid number of arguments"
-            else eval_binary_op op (List.hd operands) (List.hd (List.tl operands))
+          | Plus | Minus | Multiply | Divide | Modulo -> eval_binary_op op operands
           | _ -> failwith "TBI"
         end
     end
