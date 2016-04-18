@@ -12,6 +12,7 @@ type token =
   Number of int |
   Boolean of bool |
   Plus | Minus | Divide | Multiply | Modulo |
+  LT | LTE | GT | GTE | EQ | NEQ |
   LParen | RParen |
   EOF
 
@@ -44,6 +45,13 @@ let string_of_token token =
   | Multiply -> "Multiply"
   | Modulo -> "Modulo"
   | EOF -> "\n"
+  | LT -> "<"
+  | LTE -> "<="
+  | GT -> ">"
+  | GTE -> ">="
+  | EQ -> "="
+  | NEQ -> "/="
+
 
 let boolean_of_string s =
   match s with
@@ -72,6 +80,12 @@ let rec tokenize buf tokens =
   | '%' -> tokenize buf (tokens@[Modulo])
   | '(' -> tokenize buf (tokens@[LParen])
   | ')' -> tokenize buf (tokens@[RParen])
+  | '=' -> tokenize buf (tokens@[RParen])
+  | "\=" -> tokenize buf (tokens@[NEQ])
+  | '<' -> tokenize buf (tokens@[LT])
+  | "<=" -> tokenize buf (tokens@[LTE])
+  | '>' -> tokenize buf (tokens@[GT])
+  | ">=" -> tokenize buf (tokens@[GTE])
   | eof -> tokens
   | any -> raise (Unexpected_character (lexeme buf))
   | _ -> raise (Unexpected_character "Unrecognized character")
