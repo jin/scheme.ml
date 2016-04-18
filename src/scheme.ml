@@ -56,11 +56,11 @@ let string_of_token token =
   | AND -> "&&"
   | OR -> "||"
 
+(* Scheme considers only #f to be false and anything else to be true *)
 let boolean_of_string s =
   match s with
-  | "#t" -> true
   | "#f" -> false
-  | _ -> false
+  | _ -> true 
 
 let string_of_tokens tokens =
   "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
@@ -150,13 +150,20 @@ let rec eval sexpr =
       | _ -> raise Invalid_argument_types
     end in
 
+  let eval_conditional op operands =
+    match operands with
+    | [Boolean b; if_expr; else_expr] ->
+      if b then if_expr else else_expr
+    | _ -> raise (Parser_exn "Predicate is required for conditional") in
+
   match sexpr with
   | Atom x -> x
   | List x ->
     begin
-      match (List.hd x, List.tl x) with
-      | (List _, _) -> raise Not_function 
-      | (Atom op, args) ->
+      match x with
+      | (List _)::_ -> raise Not_function 
+      | (Atom op)::args ->
+        (* TODO: Make operands lazy eval *)
         let operands = List.map eval args in
         begin
           match op with
@@ -164,8 +171,10 @@ let rec eval sexpr =
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR 
             -> eval_binary_op op operands
-          | _ -> raise (Parser_exn "TBI")
+          | Symbol "if" -> eval_conditional op operands
+          | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
+      | [] -> raise (Parser_exn "List cannot be empty")
     end
 
 let interpret s =
@@ -177,8 +186,6 @@ let interpret s =
   (* let _ = print_endline (string_of_int (eval sexpr)) in *)
   let result = eval sexpr in
   result
-
-let read str = str
 
 let () =
   try
