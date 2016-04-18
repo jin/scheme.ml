@@ -123,7 +123,7 @@ let rec eval sexpr =
   let eval_binary_op op operands =
     if (List.length operands != 2) then raise Incorrect_argument_count
     else begin 
-      match operands with
+      match (List.map eval operands) with
       | [Number a; Number b] ->   
         begin
           match op with
@@ -151,9 +151,11 @@ let rec eval sexpr =
     end in
 
   let eval_conditional op operands =
-    match operands with
-    | [Boolean b; if_expr; else_expr] ->
-      if b then if_expr else else_expr
+    let pred = eval (List.hd operands) in
+    match pred with
+    | Boolean b ->
+      if b then (eval (List.hd (List.tl operands))) 
+      else (eval (List.hd (List.tl (List.tl operands))))
     | _ -> raise (Parser_exn "Predicate is required for conditional") in
 
   match sexpr with
@@ -162,16 +164,16 @@ let rec eval sexpr =
     begin
       match x with
       | (List _)::_ -> raise Not_function 
-      | (Atom op)::args ->
+      | (Atom op)::operands ->
         (* TODO: Make operands lazy eval *)
-        let operands = List.map eval args in
         begin
           match op with
           | Plus | Minus | Multiply | Divide | Modulo 
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR 
             -> eval_binary_op op operands
-          | Symbol "if" -> eval_conditional op operands
+          | Symbol "if" 
+            -> eval_conditional op operands
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
       | [] -> raise (Parser_exn "List cannot be empty")
