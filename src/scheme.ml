@@ -13,6 +13,7 @@ type token =
   Boolean of bool |
   Plus | Minus | Divide | Multiply | Modulo |
   LT | LTE | GT | GTE | EQ | NEQ |
+  AND | OR |
   LParen | RParen |
   EOF
 
@@ -27,6 +28,7 @@ exception Parantheses_mismatch
 (* Parser exceptions *)
 exception Parser_exn of string
 exception Incorrect_argument_count
+exception Invalid_argument_types
 
 (* Evaluation exceptions *)
 exception Eval_exn of string
@@ -51,6 +53,8 @@ let string_of_token token =
   | GTE -> ">="
   | EQ -> "="
   | NEQ -> "/="
+  | AND -> "&&"
+  | OR -> "||"
 
 let boolean_of_string s =
   match s with
@@ -85,6 +89,8 @@ let rec tokenize buf tokens =
   | "<=" -> tokenize buf (tokens@[LTE])
   | '>' -> tokenize buf (tokens@[GT])
   | ">=" -> tokenize buf (tokens@[GTE])
+  | "&&" -> tokenize buf (tokens@[AND])
+  | "||" -> tokenize buf (tokens@[OR])
   | eof -> tokens
   | any -> raise (Unexpected_character (lexeme buf))
   | _ -> raise (Unexpected_character "Unrecognized character")
@@ -115,25 +121,33 @@ let parse_to_sexp (tokens: token list) =
 let rec eval sexpr =
 
   let eval_binary_op op operands =
-    begin 
+    if (List.length operands != 2) then raise Incorrect_argument_count
+    else begin 
       match operands with
       | [Number a; Number b] ->   
         begin
-          match (op, operands) with
-          | (Plus, [Number a; Number b]) -> Number (a + b)
-          | (Minus, [Number a; Number b]) -> Number (a - b)
-          | (Multiply, [Number a; Number b]) -> Number (a * b)
-          | (Divide, [Number a; Number b]) -> Number (a / b)
-          | (Modulo, [Number a; Number b]) -> Number (a mod b)
-          | (EQ, [Number a; Number b]) -> Boolean (a = b)
-          | (NEQ, [Number a; Number b]) -> Boolean (a <> b)
-          | (LT, [Number a; Number b]) -> Boolean (a < b)
-          | (LTE, [Number a; Number b]) -> Boolean (a <= b)
-          | (GT, [Number a; Number b]) -> Boolean (a > b)
-          | (GTE, [Number a; Number b]) -> Boolean (a >= b)
+          match op with
+          | Plus -> Number (a + b)
+          | Minus -> Number (a - b)
+          | Multiply -> Number (a * b)
+          | Divide -> Number (a / b)
+          | Modulo -> Number (a mod b)
+          | EQ -> Boolean (a = b)
+          | NEQ -> Boolean (a <> b)
+          | LT -> Boolean (a < b)
+          | LTE -> Boolean (a <= b)
+          | GT -> Boolean (a > b)
+          | GTE -> Boolean (a >= b)
           | _ -> raise (Parser_exn "Binary op not implemented")
         end 
-      | _ -> raise Incorrect_argument_count
+      | [Boolean a; Boolean b] ->
+        begin
+          match op with
+          | AND -> Boolean (a && b)
+          | OR -> Boolean (a || b)
+          | _ -> raise (Parser_exn "Binary op not implemented")
+        end
+      | _ -> raise Invalid_argument_types
     end in
 
   match sexpr with
@@ -148,6 +162,7 @@ let rec eval sexpr =
           match op with
           | Plus | Minus | Multiply | Divide | Modulo 
           | EQ | NEQ | LT | LTE | GT | GTE
+          | AND | OR 
             -> eval_binary_op op operands
           | _ -> raise (Parser_exn "TBI")
         end
