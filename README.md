@@ -1,6 +1,8 @@
-Scheme interpreter in OCaml
+# Scheme interpreter in OCaml
 
-# Building and running
+See `examples` folder for implemented Scheme syntax.
+
+### Building and running
 
 ```sh
 opam install sedlex

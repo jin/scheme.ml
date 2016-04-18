@@ -36,7 +36,7 @@ let string_of_token token =
   match token with
   | Symbol s -> s
   | Number s -> (string_of_int s)
-  | Boolean s -> (string_of_bool s)
+  | Boolean s -> if s then "#t" else "#f"
   | LParen -> "LParen"
   | RParen -> "RParen"
   | Plus -> "Plus"
@@ -51,7 +51,6 @@ let string_of_token token =
   | GTE -> ">="
   | EQ -> "="
   | NEQ -> "/="
-
 
 let boolean_of_string s =
   match s with
@@ -80,8 +79,8 @@ let rec tokenize buf tokens =
   | '%' -> tokenize buf (tokens@[Modulo])
   | '(' -> tokenize buf (tokens@[LParen])
   | ')' -> tokenize buf (tokens@[RParen])
-  | '=' -> tokenize buf (tokens@[RParen])
-  | "\=" -> tokenize buf (tokens@[NEQ])
+  | '=' -> tokenize buf (tokens@[EQ])
+  | "\\=" -> tokenize buf (tokens@[NEQ])
   | '<' -> tokenize buf (tokens@[LT])
   | "<=" -> tokenize buf (tokens@[LTE])
   | '>' -> tokenize buf (tokens@[GT])
@@ -126,6 +125,12 @@ let rec eval sexpr =
           | (Multiply, [Number a; Number b]) -> Number (a * b)
           | (Divide, [Number a; Number b]) -> Number (a / b)
           | (Modulo, [Number a; Number b]) -> Number (a mod b)
+          | (EQ, [Number a; Number b]) -> Boolean (a = b)
+          | (NEQ, [Number a; Number b]) -> Boolean (a <> b)
+          | (LT, [Number a; Number b]) -> Boolean (a < b)
+          | (LTE, [Number a; Number b]) -> Boolean (a <= b)
+          | (GT, [Number a; Number b]) -> Boolean (a > b)
+          | (GTE, [Number a; Number b]) -> Boolean (a >= b)
           | _ -> raise (Parser_exn "Binary op not implemented")
         end 
       | _ -> raise Incorrect_argument_count
@@ -141,7 +146,9 @@ let rec eval sexpr =
         let operands = List.map eval args in
         begin
           match op with
-          | Plus | Minus | Multiply | Divide | Modulo -> eval_binary_op op operands
+          | Plus | Minus | Multiply | Divide | Modulo 
+          | EQ | NEQ | LT | LTE | GT | GTE
+            -> eval_binary_op op operands
           | _ -> raise (Parser_exn "TBI")
         end
     end
