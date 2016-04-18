@@ -1,12 +1,3 @@
-let ex_atom = "a";;
-let ex_atom2 = "foo";;
-let ex_empty_list = "()";;
-let ex_list_one = "(a)";;
-let ex_list_two = "(a b)";;
-let ex_list_foo_bar = "(foo bar)";;
-let ex_list_nested = "(foo bar #t 123 12 (qux #f 40912) qaz)";;
-let ex_list_arithmetic = "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))";;
-
 let letter = [%sedlex.regexp? 'a'..'z' | 'A'..'Z']
 let arithmetic_op = [%sedlex.regexp? "+" | "-" | "*" | "/" | "%" ]
 let boolean = [%sedlex.regexp? "#t" | "#f" ]
@@ -16,7 +7,7 @@ let ident = [%sedlex.regexp? letter, Star letter]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
-type token = 
+type token =
   Ident of string |
   Number of int |
   Boolean of bool |
@@ -38,7 +29,7 @@ let string_of_token token =
   | Modulo -> "Modulo"
   | EOF -> "\n"
 
-let boolean_of_string s = 
+let boolean_of_string s =
   match s with
   | "#t" -> true
   | "#f" -> false
@@ -47,21 +38,11 @@ let boolean_of_string s =
 (* S-expression type definition *)
 type sexp = Atom of token | List of sexp list
 
-let head_of_sexp sexpr = 
-  match sexpr with 
-  | List (x::xs) -> x
-  | _ -> failwith "Not a sexp list"
-
-let tail_of_sexp sexpr =
-  match sexpr with
-  | List (x::xs) -> List (xs)
-  | _ -> failwith "Not a sexp list"
-
-let string_of_tokens tokens = 
+let string_of_tokens tokens =
   "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
 
-let rec string_of_sexp sexpr = 
-  match sexpr with 
+let rec string_of_sexp sexpr =
+  match sexpr with
   | Atom x -> string_of_token x
   | List xs -> "("^(String.concat " " (List.map string_of_sexp xs))^")"
 
@@ -78,29 +59,30 @@ let rec tokenize buf tokens =
   | '%' -> tokenize buf (tokens@[Modulo])
   | '(' -> tokenize buf (tokens@[LParen])
   | ')' -> tokenize buf (tokens@[RParen])
-  | eof -> tokens 
+  | eof -> tokens
   | _ -> failwith "Lexer error: Unexpected character"
 
 (* Convert a list of tokens into an s-expression *)
-let parse_to_sexp (tokens: token list) = 
+let parse_to_sexp (tokens: token list) =
   let rec sexp_of_list tokens sexpr =
-    match tokens with 
-    | [] -> (List sexpr, [])
-    | RParen::rem_tokens -> (List sexpr, rem_tokens) 
-    | LParen::rem_tokens -> 
+    match tokens with
+    | [] -> failwith "Missing matching parenthesis"
+    | RParen::rem_tokens -> (List sexpr, rem_tokens)
+    | LParen::rem_tokens ->
       let (nested_list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
       sexp_of_list rem_tokens (sexpr@[nested_list_sexpr])
     | x::rem_tokens -> sexp_of_list rem_tokens (sexpr@[Atom x])
   in
   let rec aux toks sexpr =
-    match toks with 
+    match toks with
     | [] -> sexpr
-    | LParen::rem_tokens -> 
+    | LParen::rem_tokens ->
       let (list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
       aux rem_tokens (sexpr@[list_sexpr])
     | _ -> sexpr in
-  let sexpr = aux tokens [] in head_of_sexp (List sexpr)
-  (* FIXME: Remove the initial list variable to get rid of head_of_sexp *)
+  let sexpr = aux tokens [] in
+  List.hd sexpr
+  (* FIXME: Remove the initial list variable to get rid of List.hd *)
 
 let rec eval sexpr =
 
@@ -111,18 +93,21 @@ let rec eval sexpr =
     | (Multiply, Number a, Number b) -> Number (a * b)
     | (Divide, Number a, Number b) -> Number (a / b)
     | (Modulo, Number a, Number b) -> Number (a mod b)
-    | _ -> failwith "TBI" in
+    | _ -> failwith "Binary op not implemented" in
 
-  match sexpr with 
-  | Atom x -> x 
-  | List x -> begin
-      match (List.hd x, List.tl x) with  
+  match sexpr with
+  | Atom x -> x
+  | List x ->
+    begin
+      match (List.hd x, List.tl x) with
       | (List _, _) -> failwith "First element of list should not be a List"
-      | (Atom op, args) -> 
-        let operands = List.map eval args in begin
-          match op with 
-          | Plus | Minus | Multiply | Divide | Modulo -> 
-            eval_binary_op op (List.hd operands) (List.hd (List.tl operands))
+      | (Atom op, args) ->
+        let operands = List.map eval args in
+        begin
+          match op with
+          | Plus | Minus | Multiply | Divide | Modulo ->
+            if (List.length operands != 2) then failwith "Invalid number of arguments"
+            else eval_binary_op op (List.hd operands) (List.hd (List.tl operands))
           | _ -> failwith "TBI"
         end
     end
