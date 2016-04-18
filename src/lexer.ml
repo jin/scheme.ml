@@ -27,8 +27,8 @@ type token =
 let string_of_token token =
   match token with
   | Ident s -> s
-  | Number s -> "Number "^(string_of_int s)
-  | Boolean s -> "Boolean "^(string_of_bool s)
+  | Number s -> (string_of_int s)
+  | Boolean s -> (string_of_bool s)
   | LParen -> "LParen"
   | RParen -> "RParen"
   | Plus -> "Plus"
@@ -104,21 +104,17 @@ let parse_to_sexp (tokens: token list) =
 
 let rec eval sexpr =
 
-  let eval_binary_op operator a b =
-    match operator with
-    | Plus -> a + b
-    | Minus -> a - b
-    | Multiply -> a * b
-    | Divide -> a / b
-    | Modulo -> a mod b
+  let eval_binary_op op a b =
+    match (op, a, b) with
+    | (Plus, Number a, Number b) -> Number (a + b)
+    | (Minus, Number a, Number b) -> Number (a - b)
+    | (Multiply, Number a, Number b) -> Number (a * b)
+    | (Divide, Number a, Number b) -> Number (a / b)
+    | (Modulo, Number a, Number b) -> Number (a mod b)
     | _ -> failwith "TBI" in
 
   match sexpr with 
-  | Atom x -> begin
-    match x with
-    | Number value -> value 
-    | _ -> failwith "TBI"
-    end
+  | Atom x -> x 
   | List x -> begin
       match (List.hd x, List.tl x) with  
       | (List _, _) -> failwith "First element of list should not be a List"
@@ -141,9 +137,13 @@ let interpret s =
   let result = eval sexpr in
   result
 
+let read str = str
+
 let () =
-  let test_case = ex_list_arithmetic in
-  let res = interpret test_case in
-  let _ = print_endline (string_of_int res) in
-  ()
+  try
+    while true do
+      print_string "scheme> ";
+      print_endline (string_of_token (interpret (read_line ())));
+    done
+  with End_of_file -> ()
 ;;
