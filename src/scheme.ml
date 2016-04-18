@@ -93,7 +93,8 @@ let parse_to_sexp (tokens: token list) =
     | LParen::rem_tokens ->
       let (list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
       aux rem_tokens (sexpr@[list_sexpr])
-    | _ -> sexpr in
+    | [x] -> [Atom x]
+    | _ -> raise (Parser_exn "Invalid syntax") in
   let sexpr = aux tokens [] in
   List.hd sexpr
   (* FIXME: Remove the initial list variable to get rid of List.hd *)
