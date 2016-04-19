@@ -5,7 +5,7 @@ let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
-let keyword = [%sedlex.regexp? "if" | "car" | "cdr" ]
+let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
@@ -40,7 +40,19 @@ exception Invalid_argument_types
 exception Eval_exn of string
 exception Not_function
 
-let rec string_of_token token =
+let rec debug_string_of_token token =
+  match token with
+  | QuotedList tokens ->  
+    "'("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
+  | Symbol s -> "Symbol("^s^")"
+  | Variable s -> "Variable("^s^")"
+  | Keyword s -> "Keyword("^s^")"
+  | Number s -> "Number("^(string_of_int s)^")"
+  | Quote -> "Quote"
+  | _ -> string_of_token token 
+and debug_string_of_tokens tokens =
+  "["^(String.concat ", " (List.map (fun token -> debug_string_of_token token) tokens))^"]"
+and string_of_token token =
   match token with
   | Symbol s -> s
   | Keyword s -> s
@@ -65,16 +77,15 @@ let rec string_of_token token =
   | OR -> "||"
   | Quote -> "'"
   | QuotedList tokens ->  
-    "'("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
+    "("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
+and string_of_tokens tokens =
+  "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
 
 (* Scheme considers only #f to be false and anything else to be true *)
 let boolean_of_string s =
   match s with
   | "#f" -> false
   | _ -> true 
-
-let string_of_tokens tokens =
-  "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
 
 let rec string_of_sexp sexpr =
   match sexpr with
@@ -203,6 +214,20 @@ let rec eval sexpr =
       end
     | _ -> raise Incorrect_argument_count in
 
+  let eval_cons op operands =
+    match operands with
+    (* atom or list -> empty list *)
+    | [head; List([Atom(Quote)])] -> QuotedList([eval head])
+    | [head; List(Atom(Quote)::tail)] -> 
+      QuotedList((eval head)::(List.map eval tail))
+    | [head; tail] -> 
+      begin
+        match eval tail with
+        | QuotedList(x) -> QuotedList((eval head)::x)
+        | _ -> failwith "TBI"
+      end
+    | _ -> raise Incorrect_argument_count in
+
   match sexpr with
   | Atom x -> x
   | List x ->
@@ -219,6 +244,7 @@ let rec eval sexpr =
           | Keyword "if" -> eval_conditional op operands
           | Keyword "car" -> eval_car op operands
           | Keyword "cdr" -> eval_cdr op operands
+          | Keyword "cons" -> eval_cons op operands
           | Quote -> QuotedList (List.map eval operands) 
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
@@ -231,7 +257,7 @@ let interpret s =
   let _ = print_endline s in
   let lexbuf = Sedlexing.Utf8.from_string s in
   let tokens = tokenize lexbuf [] in
-  let _ = print_debug "Tokens: " (string_of_tokens tokens) in
+  let _ = print_debug "Tokens: " (debug_string_of_tokens tokens) in
   let sexpr = parse_to_sexp tokens in
   let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in
   let _ = print_debug "Result: " (string_of_token (eval sexpr)) in
