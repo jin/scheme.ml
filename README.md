@@ -36,6 +36,7 @@ DEBUG: Result: (2, 3)
 opam install sedlex
 
 make
+make test # run all examples 
 
 # this starts the interpreter
 bin/lexer 
