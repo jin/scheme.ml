@@ -3,13 +3,17 @@ let arithmetic_op = [%sedlex.regexp? "+" | "-" | "*" | "/" | "%" ]
 let boolean = [%sedlex.regexp? "#t" | "#f" ]
 let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Plus digit]
-let ident = [%sedlex.regexp? letter, Star letter]
+let variable = [%sedlex.regexp? letter, Star letter]
+let symbol = [%sedlex.regexp? '\'', letter, Star letter]
+let keyword = [%sedlex.regexp? "if" ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
 type token =
   QuotedList of token list |
   Symbol of string |
+  Keyword of string |
+  Variable of string |
   Number of int |
   Boolean of bool |
   Plus | Minus | Divide | Multiply | Modulo |
@@ -38,7 +42,9 @@ exception Not_function
 
 let rec string_of_token token =
   match token with
-  | Symbol s -> s
+  | Symbol s -> "Symbol("^s^")"
+  | Keyword s -> "Keyword("^s^")"
+  | Variable s -> "Variable("^s^")"
   | Number s -> (string_of_int s)
   | Boolean s -> if s then "#t" else "#f"
   | LParen -> "LParen"
@@ -80,7 +86,9 @@ let rec tokenize buf tokens =
   | white_space -> tokenize buf tokens
   | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
   | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
-  | ident -> tokenize buf (tokens@[Symbol (lexeme buf)])
+  | symbol -> tokenize buf (tokens@[Symbol (lexeme buf)])
+  | keyword -> tokenize buf (tokens@[Keyword (lexeme buf)])
+  | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
   | '+' -> tokenize buf (tokens@[Plus])
   | '-' -> tokenize buf (tokens@[Minus])
   | '/' -> tokenize buf (tokens@[Divide])
@@ -183,7 +191,7 @@ let rec eval sexpr =
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR 
             -> eval_binary_op op operands
-          | Symbol "if" -> eval_conditional op operands
+          | Keyword "if" -> eval_conditional op operands
           | Quote -> QuotedList (List.map eval operands) 
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
