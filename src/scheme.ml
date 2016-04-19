@@ -239,8 +239,7 @@ let rec eval sexpr =
           match op with
           | Plus | Minus | Multiply | Divide | Modulo 
           | EQ | NEQ | LT | LTE | GT | GTE
-          | AND | OR 
-            -> eval_binary_op op operands
+          | AND | OR -> eval_binary_op op operands
           | Keyword "if" -> eval_conditional op operands
           | Keyword "car" -> eval_car op operands
           | Keyword "cdr" -> eval_cdr op operands
