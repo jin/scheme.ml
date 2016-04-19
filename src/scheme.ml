@@ -19,7 +19,7 @@ type token =
   Plus | Minus | Divide | Multiply | Modulo |
   LT | LTE | GT | GTE | EQ | NEQ |
   AND | OR |
-  LParen | RParen |
+  LParen | RParen | (* TODO: Get rid of this *)
   Quote |
   EOF
 
@@ -212,10 +212,12 @@ let interpret s =
   result
 
 let () =
+  let line_number = ref 1 in
   try
     while true do
       print_string "scheme> ";
-      print_endline (string_of_token (interpret (read_line ())));
+      print_endline ((string_of_int !line_number)^"> "^(string_of_token (interpret (read_line ()))));
+      line_number := 1 + !line_number;
     done
   with End_of_file -> ()
 ;;
