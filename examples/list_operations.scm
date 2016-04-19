@@ -1,0 +1,6 @@
+(car '(1 2 3))
+(car '(a b c))
+(car '('c 3 'a 'b))
+(car '(1))
+(cdr '(1 2 3))
+(cdr '(a b c))

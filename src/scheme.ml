@@ -198,7 +198,7 @@ let rec eval sexpr =
     | x::xs -> 
       begin
         match eval x with
-        | QuotedList(y::ys) -> ys
+        | QuotedList(y::ys) -> QuotedList(ys)
         | _ -> raise Incorrect_argument_count
       end
     | _ -> raise Incorrect_argument_count in
@@ -218,6 +218,7 @@ let rec eval sexpr =
             -> eval_binary_op op operands
           | Keyword "if" -> eval_conditional op operands
           | Keyword "car" -> eval_car op operands
+          | Keyword "cdr" -> eval_cdr op operands
           | Quote -> QuotedList (List.map eval operands) 
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
