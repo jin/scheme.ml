@@ -2,7 +2,7 @@ let letter = [%sedlex.regexp? 'a'..'z' | 'A'..'Z']
 let arithmetic_op = [%sedlex.regexp? "+" | "-" | "*" | "/" | "%" ]
 let boolean = [%sedlex.regexp? "#t" | "#f" ]
 let digit = [%sedlex.regexp? '0'..'9']
-let number = [%sedlex.regexp? Plus digit]
+let number = [%sedlex.regexp? Opt '-', Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
 let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" ]
@@ -173,14 +173,14 @@ let rec eval sexpr =
           | LTE -> Boolean (a <= b)
           | GT -> Boolean (a > b)
           | GTE -> Boolean (a >= b)
-          | _ -> raise (Parser_exn "Binary op not implemented")
+          | _ -> raise (Parser_exn "Type error")
         end 
       | [Boolean a; Boolean b] ->
         begin
           match op with
           | AND -> Boolean (a && b)
           | OR -> Boolean (a || b)
-          | _ -> raise (Parser_exn "Binary op not implemented")
+          | _ -> raise (Parser_exn "Type error")
         end
       | _ -> raise Invalid_argument_types
     end in
