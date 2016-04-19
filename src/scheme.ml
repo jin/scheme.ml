@@ -5,7 +5,7 @@ let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
-let keyword = [%sedlex.regexp? "if" ]
+let keyword = [%sedlex.regexp? "if" | "car" | "cdr" ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
@@ -42,9 +42,9 @@ exception Not_function
 
 let rec string_of_token token =
   match token with
-  | Symbol s -> "Symbol("^s^")"
-  | Keyword s -> "Keyword("^s^")"
-  | Variable s -> "Variable("^s^")"
+  | Symbol s -> s
+  | Keyword s -> s
+  | Variable s -> s
   | Number s -> (string_of_int s)
   | Boolean s -> if s then "#t" else "#f"
   | LParen -> "LParen"
@@ -116,7 +116,12 @@ let parse_to_sexp (tokens: token list) =
     | [] -> raise Parantheses_mismatch
     | RParen::rem_tokens -> (List sexpr, rem_tokens)
     | Quote::LParen::rem_tokens -> 
-      sexp_of_list rem_tokens (sexpr@[Atom Quote])
+      begin
+        match sexpr with
+        | [] -> sexp_of_list rem_tokens (sexpr@[Atom Quote])
+        | _ -> let (nested_list_sexpr, rem_tokens) = sexp_of_list rem_tokens [Atom Quote] in
+          sexp_of_list rem_tokens (sexpr@[nested_list_sexpr])
+      end
     | LParen::rem_tokens ->
       let (nested_list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
       sexp_of_list rem_tokens (sexpr@[nested_list_sexpr])
@@ -178,6 +183,26 @@ let rec eval sexpr =
       else (eval (List.hd (List.tl (List.tl operands))))
     | _ -> raise (Parser_exn "Predicate is required for conditionals") in
 
+  let eval_car op operands =
+    match operands with 
+    | x::xs -> 
+      begin
+        match eval x with
+        | QuotedList(y::ys) -> y
+        | _ -> raise Incorrect_argument_count
+      end
+    | _ -> raise Incorrect_argument_count in
+
+  let eval_cdr op operands =
+    match operands with 
+    | x::xs -> 
+      begin
+        match eval x with
+        | QuotedList(y::ys) -> ys
+        | _ -> raise Incorrect_argument_count
+      end
+    | _ -> raise Incorrect_argument_count in
+
   match sexpr with
   | Atom x -> x
   | List x ->
@@ -192,6 +217,7 @@ let rec eval sexpr =
           | AND | OR 
             -> eval_binary_op op operands
           | Keyword "if" -> eval_conditional op operands
+          | Keyword "car" -> eval_car op operands
           | Quote -> QuotedList (List.map eval operands) 
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
