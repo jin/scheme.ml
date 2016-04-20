@@ -26,6 +26,9 @@ type token =
 (* S-expression type definition *)
 type sexp = Atom of token | List of sexp list
 
+(* Null value in Scheme is represented as an empty list '() *)
+let empty_list = List([Atom(Quote)])
+
 (* Lexer exceptions *)
 exception Lexer_exn of string
 exception Unexpected_character of string
@@ -153,7 +156,7 @@ let parse_to_sexp (tokens: token list) =
   List.hd sexpr
   (* FIXME: Remove the initial list variable to get rid of List.hd *)
 
-let rec eval sexpr =
+let rec eval (sexpr: sexp) : token =
 
   let eval_binary_op op operands =
     if (List.length operands != 2) then raise Incorrect_argument_count
@@ -217,7 +220,7 @@ let rec eval sexpr =
   let eval_cons op operands =
     match operands with
     (* atom or list -> empty list *)
-    | [head; List([Atom(Quote)])] -> QuotedList([eval head])
+    | [head; empty_list] -> QuotedList([eval head])
     | [head; List(Atom(Quote)::tail)] -> 
       QuotedList((eval head)::(List.map eval tail))
     | [head; tail] -> 
