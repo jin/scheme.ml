@@ -33,12 +33,16 @@ DEBUG: Result: (2, 3)
 ### Building and running
 
 ```sh
+# install dependencies
 opam install sedlex
 
+# build the binary
 make
-make test # run all examples 
 
-# this starts the interpreter
+# run all examples and diffs output against respective expected output in make test
+outputs in examples/test
+
+# start the interpreter
 bin/lexer 
 
 # or feed Scheme code into STDIN

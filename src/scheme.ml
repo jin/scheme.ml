@@ -257,13 +257,13 @@ let rec eval (sexpr: sexp) : token =
 let print_debug prelude s = print_endline ("DEBUG: "^prelude^s)
 
 let interpret s =
-  let _ = print_endline s in
+  (* let _ = print_endline s in *)
   let lexbuf = Sedlexing.Utf8.from_string s in
   let tokens = tokenize lexbuf [] in
-  let _ = print_debug "Tokens: " (debug_string_of_tokens tokens) in
+  (* let _ = print_debug "Tokens: " (debug_string_of_tokens tokens) in *)
   let sexpr = parse_to_sexp tokens in
-  let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in
-  let _ = print_debug "Result: " (string_of_token (eval sexpr)) in
+  (* let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in *)
+  (* let _ = print_debug "Result: " (string_of_token (eval sexpr)) in *)
   let result = eval sexpr in
   result
 
