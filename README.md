@@ -39,8 +39,7 @@ opam install sedlex
 # build the binary
 make
 
-# run all examples and diffs output against respective expected output in
-examples/test
+# run all examples and diffs output against respective expected output in examples/test
 make test
 
 # start the interpreter
