@@ -13,3 +13,4 @@
 (cdr (cons 1 '((* 1 2) (if (< 1 2) 3 4))))
 (cons 1 (cons 2 '(3 4)))
 (cons 1 (cons 2 (cons 4 '())))
+(cons 'a '(c d e))

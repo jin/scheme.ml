@@ -220,7 +220,8 @@ let rec eval (sexpr: sexp) : token =
   let eval_cons op operands =
     match operands with
     (* atom or list -> empty list *)
-    | [head; empty_list] -> QuotedList([eval head])
+    | [head; List([Atom(Quote)])] ->
+      QuotedList([eval head])
     | [head; List(Atom(Quote)::tail)] -> 
       QuotedList((eval head)::(List.map eval tail))
     | [head; tail] -> 
