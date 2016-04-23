@@ -41,4 +41,3 @@ let parse_to_sexp (tokens: token list) =
   let sexpr = aux tokens [] in
   List.hd sexpr
   (* FIXME: Remove the initial list variable to get rid of List.hd *)
-

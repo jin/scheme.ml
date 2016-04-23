@@ -15,12 +15,6 @@ let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 exception Lexer_exn of string
 exception Unexpected_character of string
 
-(* Scheme considers only #f to be false and anything else to be true *)
-let boolean_of_string s =
-  match s with
-  | "#f" -> false
-  | _ -> true 
-
 let rec tokenize buf tokens =
   match%sedlex buf with
   | white_space -> tokenize buf tokens
@@ -43,7 +37,7 @@ let rec tokenize buf tokens =
   | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
   | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
   | symbol -> tokenize buf (tokens@[Symbol (lexeme buf)])
-  | keyword -> tokenize buf (tokens@[Keyword (lexeme buf)])
+  | keyword -> tokenize buf (tokens@[keyword_of_string (lexeme buf)])
   | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
   | eof -> tokens
   | any -> raise (Unexpected_character (lexeme buf))

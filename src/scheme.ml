@@ -95,10 +95,10 @@ let rec eval (sexpr: sexp) : token =
           | Plus | Minus | Multiply | Divide | Modulo 
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR -> eval_binary_op op operands
-          | Keyword "if" -> eval_conditional op operands
-          | Keyword "car" -> eval_car op operands
-          | Keyword "cdr" -> eval_cdr op operands
-          | Keyword "cons" -> eval_cons op operands
+          | Keyword If-> eval_conditional op operands
+          | Keyword Car -> eval_car op operands
+          | Keyword Cdr -> eval_cdr op operands
+          | Keyword Cons -> eval_cons op operands
           | Quote -> QuotedList (List.map eval operands) 
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
