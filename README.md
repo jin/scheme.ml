@@ -43,8 +43,8 @@ make
 make test
 
 # start the interpreter
-bin/lexer 
+./scheme
 
 # or feed Scheme code into STDIN
-bin/lexer < examples/arithmetic.scm
+./scheme < examples/arithmetic.scm
 ```
