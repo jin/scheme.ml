@@ -1,10 +1,11 @@
+(* imports *)
+open Lexer
 open Parser
 open Types
 
 (* Evaluation exceptions *)
 exception Eval_exn of string
 exception Not_function
-
 
 let rec eval (sexpr: sexp) : token =
 
