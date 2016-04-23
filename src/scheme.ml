@@ -76,8 +76,8 @@ and string_of_token token =
   | GTE -> ">="
   | EQ -> "="
   | NEQ -> "/="
-  | AND -> "&&"
-  | OR -> "||"
+  | AND -> "and"
+  | OR -> "or"
   | Quote -> "'"
   | QuotedList tokens ->  
     "("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
@@ -98,11 +98,6 @@ let rec string_of_sexp sexpr =
 let rec tokenize buf tokens =
   match%sedlex buf with
   | white_space -> tokenize buf tokens
-  | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
-  | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
-  | symbol -> tokenize buf (tokens@[Symbol (lexeme buf)])
-  | keyword -> tokenize buf (tokens@[Keyword (lexeme buf)])
-  | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
   | '+' -> tokenize buf (tokens@[Plus])
   | '-' -> tokenize buf (tokens@[Minus])
   | '/' -> tokenize buf (tokens@[Divide])
@@ -116,9 +111,14 @@ let rec tokenize buf tokens =
   | "<=" -> tokenize buf (tokens@[LTE])
   | '>' -> tokenize buf (tokens@[GT])
   | ">=" -> tokenize buf (tokens@[GTE])
-  | "&&" -> tokenize buf (tokens@[AND])
-  | "||" -> tokenize buf (tokens@[OR])
+  | "and" -> tokenize buf (tokens@[AND])
+  | "or" -> tokenize buf (tokens@[OR])
   | '\'' -> tokenize buf (tokens@[Quote])
+  | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
+  | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
+  | symbol -> tokenize buf (tokens@[Symbol (lexeme buf)])
+  | keyword -> tokenize buf (tokens@[Keyword (lexeme buf)])
+  | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
   | eof -> tokens
   | any -> raise (Unexpected_character (lexeme buf))
   | _ -> raise (Unexpected_character "Unrecognized character")
