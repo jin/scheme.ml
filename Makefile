@@ -5,9 +5,8 @@ EXAMPLESDIR=examples
 EXAMPLES=$(wildcard $(EXAMPLESDIR)/*.scm)
 
 all:
-	mkdir -p $(BUILDDIR) 
-	ocamlfind ocamlc -c -package sedlex -package gen $(SRCDIR)/$(PROGRAM).ml
-	ocamlfind ocamlc -o $(BUILDDIR)/$(PROGRAM) -linkpkg -package sedlex -package gen $(SRCDIR)/$(PROGRAM).cmo
+	ocamlbuild -j 0 -r -pkg sedlex -use-ocamlfind src/scheme.native
+	mv scheme.native scheme
 
 test: 
 	examples/diff.sh $(EXAMPLES)
