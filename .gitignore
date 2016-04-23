@@ -20,4 +20,4 @@ setup.data
 setup.log
 
 bin/
-./scheme
+scheme
