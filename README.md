@@ -48,3 +48,12 @@ make test
 # or feed Scheme code into STDIN
 ./scheme < examples/arithmetic.scm
 ```
+
+### What's next 
+
+In the order of features I want to look into.
+
+- [ ] Separation of eval logic from lexer/parser more
+- [ ] Binary should accept filenames and not read from STDIN
+- [ ] `cond`
+- [ ] Lambdas
