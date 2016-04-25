@@ -9,7 +9,7 @@ exception Not_function
 
 let rec eval (sexpr: sexp) : token =
 
-  let eval_binary_op op operands =
+  let eval_binary_op (op: token) (operands: sexp list) : token =
     if (List.length operands != 2) then raise Incorrect_argument_count
     else begin 
       match (List.map eval operands) with
@@ -39,16 +39,16 @@ let rec eval (sexpr: sexp) : token =
       | _ -> raise Invalid_argument_types
     end in
 
-  let eval_conditional op operands =
+  let eval_conditional (op: token) (operands: sexp list) : token =
     (* Lazy evaluation *)
-    let pred = eval (List.hd operands) in
-    match pred with
+    let predicate = eval (List.hd operands) in
+    match predicate with
     | Boolean b ->
       if b then (eval (List.hd (List.tl operands))) 
       else (eval (List.hd (List.tl (List.tl operands))))
     | _ -> raise (Parser_exn "Predicate is required for conditionals") in
 
-  let eval_car op operands =
+  let eval_car (op: token) (operands: sexp list) =
     match operands with 
     | x::xs -> 
       begin
@@ -58,7 +58,7 @@ let rec eval (sexpr: sexp) : token =
       end
     | _ -> raise Incorrect_argument_count in
 
-  let eval_cdr op operands =
+  let eval_cdr (op: token) (operands: sexp list) =
     match operands with 
     | x::xs -> 
       begin
@@ -68,11 +68,9 @@ let rec eval (sexpr: sexp) : token =
       end
     | _ -> raise Incorrect_argument_count in
 
-  let eval_cons op operands =
+  let eval_cons (op: token) (operands: sexp list) =
     match operands with
     (* atom or list -> empty list *)
-    | [head; List([Atom(Quote)])] ->
-      QuotedList([eval head])
     | [head; List(Atom(Quote)::tail)] -> 
       QuotedList((eval head)::(List.map eval tail))
     | [head; tail] -> 
@@ -95,7 +93,7 @@ let rec eval (sexpr: sexp) : token =
           | Plus | Minus | Multiply | Divide | Modulo 
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR -> eval_binary_op op operands
-          | Keyword If-> eval_conditional op operands
+          | Keyword If -> eval_conditional op operands
           | Keyword Car -> eval_car op operands
           | Keyword Cdr -> eval_cdr op operands
           | Keyword Cons -> eval_cons op operands
