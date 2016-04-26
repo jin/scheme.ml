@@ -11,9 +11,9 @@ let rec eval (sexpr: sexp) : token =
 
   let eval_binary_op (op: token) (operands: sexp list) : token =
     if (List.length operands != 2) then raise Incorrect_argument_count
-    else begin 
+    else begin
       match (List.map eval operands) with
-      | [Number a; Number b] ->   
+      | [Number a; Number b] ->
         begin
           match op with
           | Plus -> Number (a + b)
@@ -28,7 +28,7 @@ let rec eval (sexpr: sexp) : token =
           | GT -> Boolean (a > b)
           | GTE -> Boolean (a >= b)
           | _ -> raise (Parser_exn "Type error")
-        end 
+        end
       | [Boolean a; Boolean b] ->
         begin
           match op with
@@ -44,13 +44,13 @@ let rec eval (sexpr: sexp) : token =
     let predicate = eval (List.hd operands) in
     match predicate with
     | Boolean b ->
-      if b then (eval (List.hd (List.tl operands))) 
+      if b then (eval (List.hd (List.tl operands)))
       else (eval (List.hd (List.tl (List.tl operands))))
     | _ -> raise (Parser_exn "Predicate is required for conditionals") in
 
   let eval_car (op: token) (operands: sexp list) =
-    match operands with 
-    | x::xs -> 
+    match operands with
+    | x::xs ->
       begin
         match eval x with
         | QuotedList(y::ys) -> y
@@ -59,8 +59,8 @@ let rec eval (sexpr: sexp) : token =
     | _ -> raise Incorrect_argument_count in
 
   let eval_cdr (op: token) (operands: sexp list) =
-    match operands with 
-    | x::xs -> 
+    match operands with
+    | x::xs ->
       begin
         match eval x with
         | QuotedList(y::ys) -> QuotedList(ys)
@@ -71,9 +71,9 @@ let rec eval (sexpr: sexp) : token =
   let eval_cons (op: token) (operands: sexp list) =
     match operands with
     (* atom or list -> empty list *)
-    | [head; List(Atom(Quote)::tail)] -> 
+    | [head; List(Atom(Quote)::tail)] ->
       QuotedList((eval head)::(List.map eval tail))
-    | [head; tail] -> 
+    | [head; tail] ->
       begin
         match eval tail with
         | QuotedList(x) -> QuotedList((eval head)::x)
@@ -86,18 +86,18 @@ let rec eval (sexpr: sexp) : token =
   | List x ->
     begin
       match x with
-      | (List _)::_ -> raise Not_function 
+      | (List _)::_ -> raise Not_function
       | (Atom op)::operands ->
         begin
           match op with
-          | Plus | Minus | Multiply | Divide | Modulo 
+          | Plus | Minus | Multiply | Divide | Modulo
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR -> eval_binary_op op operands
           | Keyword If -> eval_conditional op operands
           | Keyword Car -> eval_car op operands
           | Keyword Cdr -> eval_cdr op operands
           | Keyword Cons -> eval_cons op operands
-          | Quote -> QuotedList (List.map eval operands) 
+          | Quote -> QuotedList (List.map eval operands)
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
         end
       | [] -> raise (Parser_exn "List cannot be empty")
@@ -116,13 +116,11 @@ let interpret s =
   let result = eval sexpr in
   result
 
-let () =
-  let line_number = ref 1 in
+let rec repl line_number =
   try
-    while true do
-      print_string "scheme> ";
-      print_endline ((string_of_int !line_number)^"> "^(string_of_token (interpret (read_line ()))));
-      line_number := 1 + !line_number;
-    done
+    print_string "scheme> ";
+    print_endline ((string_of_int line_number)^"> "^(string_of_token (interpret (read_line ()))));
+    repl (line_number + 1)
   with End_of_file -> ()
-;;
+
+let () = repl 1;;
