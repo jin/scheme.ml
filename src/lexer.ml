@@ -13,6 +13,7 @@ let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
 (* Lexer exceptions *)
 exception Lexer_exn of string
+exception Lexer_failure
 exception Unexpected_character of string
 
 let rec tokenize buf tokens =
@@ -41,4 +42,4 @@ let rec tokenize buf tokens =
   | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
   | eof -> tokens
   | any -> raise (Unexpected_character (lexeme buf))
-  | _ -> raise (Unexpected_character "Unrecognized character")
+  | _ -> raise Lexer_failure
