@@ -123,4 +123,21 @@ let rec repl line_number =
     repl (line_number + 1)
   with End_of_file -> ()
 
-let () = repl 1;;
+(* main function *)
+(* all io operations are contained here *)
+let () =
+  if Array.length Sys.argv > 1 then
+    let filename = Sys.argv.(1) in
+    let src = open_in filename in
+    let lines = [] in
+    try
+      while true do
+        let line = input_line src in
+        let result = string_of_token (interpret line) in
+        let _ = print_endline result in
+        flush stdout
+      done
+    with
+    | End_of_file -> close_in src
+    | e -> close_in_noerr src; raise e
+  else repl 1;;

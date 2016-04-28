@@ -54,6 +54,6 @@ make test
 In the order of features I want to look into.
 
 - [ ] Separation of eval logic from lexer/parser more
-- [ ] Binary should accept filenames and not read from STDIN
+- [x] Binary should accept filenames and not read from STDIN
 - [ ] `cond`
 - [ ] Lambdas
