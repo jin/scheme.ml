@@ -1,6 +1,6 @@
 # Scheme interpreter in OCaml
 
-See `examples` folder for implemented Scheme syntax.
+See `test.ml` for the set of implemented Scheme syntax.
 
 ### How it works
 
