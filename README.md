@@ -34,7 +34,7 @@ DEBUG: Result: (2, 3)
 
 ```sh
 # install dependencies
-opam install sedlex
+opam install sedlex alcotest
 
 # build the binary
 make

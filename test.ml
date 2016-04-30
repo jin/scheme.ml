@@ -59,6 +59,11 @@ module List = struct
       Alcotest.(check string) "car" "1" (interpret "(car '(1))");
       Alcotest.(check string) "cdr" "(2 3)" (interpret "(cdr '(1 2 3))");
     end
+
+  let quoted () =
+    begin
+      Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
+    end
 end
 
 (* Run it *)
@@ -70,5 +75,6 @@ let () =
       "Logical disjunctions", `Quick, LogicalConnectives.disjunction;
       "Conditionals", `Quick, Conditional.operations;
       "List", `Quick, List.operations;
+      "Quoted list", `Quick, List.quoted;
     ]
   ]
