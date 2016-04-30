@@ -1,8 +1,6 @@
-(* imports *)
 open Lexer
 open Parser
 open Types
-open Printf
 
 (* Evaluation exceptions *)
 exception Eval_exn of string
@@ -106,7 +104,7 @@ let rec eval (sexpr: sexp) : token =
 
 let print_debug prelude s = print_endline ("DEBUG: "^prelude^s)
 
-let interpret s =
+let interpret (s: string) : string =
   (* let _ = print_endline s in *)
   let lexbuf = Sedlexing.Utf8.from_string s in
   let tokens = tokenize lexbuf [] in
@@ -115,34 +113,5 @@ let interpret s =
   (* let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in *)
   (* let _ = print_debug "Result: " (string_of_token (eval sexpr)) in *)
   let result = eval sexpr in
-  result
+  string_of_token result
 
-let rec repl line_number =
-  try
-    let input = read_line () in
-    begin
-      Printf.sprintf "scheme> ";
-      Printf.sprintf "%d> %s" line_number (string_of_token (interpret (read_line ())));
-      repl (line_number + 1)
-    end
-  with End_of_file -> ()
-
-let has_filename = Array.length Sys.argv > 1
-
-(* main function *)
-(* all io operations are contained here *)
-let () =
-  if has_filename then
-    let filename = Sys.argv.(1) in
-    let src = open_in filename in
-    try
-      while true do
-        let line = input_line src in
-        let result = string_of_token (interpret line) in
-        let _ = print_endline result in
-        flush stdout
-      done
-    with
-    | End_of_file -> close_in src
-    | e -> close_in_noerr src; raise e
-  else repl 1;;

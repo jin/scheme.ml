@@ -1,8 +1,0 @@
-(and #t #t)
-(and #f #t)
-(and #t #f)
-(and #f #f)
-(or #t #t)
-(or #f #t)
-(or #t #f)
-(or #f #f)
