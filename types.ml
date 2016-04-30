@@ -81,9 +81,9 @@ and string_of_token token =
   | OR -> "or"
   | Quote -> "'"
   | QuotedList tokens ->  
-    "("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
+    "("^(String.concat " " (List.map (fun token -> string_of_token token) tokens))^")"
 and string_of_tokens tokens =
-  "["^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^"]"
+  "["^(String.concat " " (List.map (fun token -> string_of_token token) tokens))^"]"
 
 let rec string_of_sexp sexpr =
   match sexpr with

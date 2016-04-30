@@ -57,7 +57,7 @@ module List = struct
       Alcotest.(check string) "car" "'a" (interpret "(car '('a 'b 'c))");
       Alcotest.(check string) "car" "'c" (interpret "(car '('c 3 'a 'b))");
       Alcotest.(check string) "car" "1" (interpret "(car '(1))");
-      Alcotest.(check string) "cdr" "(2, 3)" (interpret "(cdr '(1 2 3))");
+      Alcotest.(check string) "cdr" "(2 3)" (interpret "(cdr '(1 2 3))");
     end
 end
 
