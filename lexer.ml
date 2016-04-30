@@ -16,30 +16,32 @@ exception Lexer_exn of string
 exception Lexer_failure
 exception Unexpected_character of string
 
-let rec tokenize buf tokens =
-  match%sedlex buf with
-  | white_space -> tokenize buf tokens
-  | '+' -> tokenize buf (tokens@[Plus])
-  | '-' -> tokenize buf (tokens@[Minus])
-  | '/' -> tokenize buf (tokens@[Divide])
-  | '*' -> tokenize buf (tokens@[Multiply])
-  | '%' -> tokenize buf (tokens@[Modulo])
-  | '(' -> tokenize buf (tokens@[LParen])
-  | ')' -> tokenize buf (tokens@[RParen])
-  | '=' -> tokenize buf (tokens@[EQ])
-  | "\\=" -> tokenize buf (tokens@[NEQ])
-  | '<' -> tokenize buf (tokens@[LT])
-  | "<=" -> tokenize buf (tokens@[LTE])
-  | '>' -> tokenize buf (tokens@[GT])
-  | ">=" -> tokenize buf (tokens@[GTE])
-  | "and" -> tokenize buf (tokens@[AND])
-  | "or" -> tokenize buf (tokens@[OR])
-  | '\'' -> tokenize buf (tokens@[Quote])
-  | number -> tokenize buf (tokens@[Number (int_of_string (lexeme buf))])
-  | boolean -> tokenize buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
-  | symbol -> tokenize buf (tokens@[Symbol (lexeme buf)])
-  | keyword -> tokenize buf (tokens@[keyword_of_string (lexeme buf)])
-  | variable -> tokenize buf (tokens@[Variable (lexeme buf)])
-  | eof -> tokens
-  | any -> raise (Unexpected_character (lexeme buf))
-  | _ -> raise Lexer_failure
+let tokenize buf =
+  let rec aux buf tokens =
+    match%sedlex buf with
+    | white_space -> aux buf tokens
+    | '+' -> aux buf (tokens@[Plus])
+    | '-' -> aux buf (tokens@[Minus])
+    | '/' -> aux buf (tokens@[Divide])
+    | '*' -> aux buf (tokens@[Multiply])
+    | '%' -> aux buf (tokens@[Modulo])
+    | '(' -> aux buf (tokens@[LParen])
+    | ')' -> aux buf (tokens@[RParen])
+    | '=' -> aux buf (tokens@[EQ])
+    | "\\=" -> aux buf (tokens@[NEQ])
+    | '<' -> aux buf (tokens@[LT])
+    | "<=" -> aux buf (tokens@[LTE])
+    | '>' -> aux buf (tokens@[GT])
+    | ">=" -> aux buf (tokens@[GTE])
+    | "and" -> aux buf (tokens@[AND])
+    | "or" -> aux buf (tokens@[OR])
+    | '\'' -> aux buf (tokens@[Quote])
+    | number -> aux buf (tokens@[Number (int_of_string (lexeme buf))])
+    | boolean -> aux buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
+    | symbol -> aux buf (tokens@[Symbol (lexeme buf)])
+    | keyword -> aux buf (tokens@[keyword_of_string (lexeme buf)])
+    | variable -> aux buf (tokens@[Variable (lexeme buf)])
+    | eof -> tokens
+    | any -> raise (Unexpected_character (lexeme buf))
+    | _ -> raise Lexer_failure in
+  aux buf []
