@@ -2,6 +2,7 @@
 open Lexer
 open Parser
 open Types
+open Printf
 
 (* Evaluation exceptions *)
 exception Eval_exn of string
@@ -118,18 +119,22 @@ let interpret s =
 
 let rec repl line_number =
   try
-    print_string "scheme> ";
-    print_endline ((string_of_int line_number)^"> "^(string_of_token (interpret (read_line ()))));
-    repl (line_number + 1)
+    let input = read_line () in
+    begin
+      Printf.sprintf "scheme> ";
+      Printf.sprintf "%d> %s" line_number (string_of_token (interpret (read_line ())));
+      repl (line_number + 1)
+    end
   with End_of_file -> ()
+
+let has_filename = Array.length Sys.argv > 1
 
 (* main function *)
 (* all io operations are contained here *)
 let () =
-  if Array.length Sys.argv > 1 then
+  if has_filename then
     let filename = Sys.argv.(1) in
     let src = open_in filename in
-    let lines = [] in
     try
       while true do
         let line = input_line src in

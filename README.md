@@ -45,8 +45,8 @@ make test
 # start the interpreter
 ./scheme
 
-# or feed Scheme code into STDIN
-./scheme < examples/arithmetic.scm
+# or load a source file
+./scheme examples/arithmetic.scm
 ```
 
 ### What's next 
