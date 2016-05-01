@@ -1,5 +1,6 @@
 open Types
 
+(* Regular expressions *)
 let letter = [%sedlex.regexp? 'a'..'z' | 'A'..'Z']
 let arithmetic_op = [%sedlex.regexp? "+" | "-" | "*" | "/" | "%" ]
 let boolean = [%sedlex.regexp? "#t" | "#f" ]
@@ -8,7 +9,7 @@ let number = [%sedlex.regexp? Opt '-', Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
 let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" ]
-let manyletters = [%sedlex.regexp? '"', letter, Plus (letter | digit), '"' ]
+let some_string = [%sedlex.regexp? '"', letter, Plus (letter | digit), '"' ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
@@ -17,7 +18,8 @@ exception Lexer_exn of string
 exception Lexer_failure
 exception Unexpected_character of string
 
-let tokenize buf =
+(* Lexing function *)
+let tokenize (buf: Sedlexing.lexbuf) : token list =
   let rec aux buf tokens =
     match%sedlex buf with
     | white_space -> aux buf tokens
@@ -37,7 +39,7 @@ let tokenize buf =
     | "and" -> aux buf (tokens@[AND])
     | "or" -> aux buf (tokens@[OR])
     | '\'' -> aux buf (tokens@[Quote])
-    | manyletters -> aux buf (tokens@[String (lexeme buf)])
+    | some_string -> aux buf (tokens@[String (lexeme buf)])
     | number -> aux buf (tokens@[Number (int_of_string (lexeme buf))])
     | boolean -> aux buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
     | symbol -> aux buf (tokens@[Symbol (lexeme buf)])
