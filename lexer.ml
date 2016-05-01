@@ -8,6 +8,7 @@ let number = [%sedlex.regexp? Opt '-', Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
 let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" ]
+let manyletters = [%sedlex.regexp? '"', letter, Plus (letter | digit), '"' ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
@@ -36,6 +37,7 @@ let tokenize buf =
     | "and" -> aux buf (tokens@[AND])
     | "or" -> aux buf (tokens@[OR])
     | '\'' -> aux buf (tokens@[Quote])
+    | manyletters -> aux buf (tokens@[String (lexeme buf)])
     | number -> aux buf (tokens@[Number (int_of_string (lexeme buf))])
     | boolean -> aux buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
     | symbol -> aux buf (tokens@[Symbol (lexeme buf)])

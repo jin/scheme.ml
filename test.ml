@@ -13,6 +13,7 @@ module EvalTests = struct
       Alcotest.(check string) "list with two elements" "(1 2)" (interpret "'(1 2)");
       Alcotest.(check string) "list with nested elements" "((1 2) 3)" (interpret "'('(1 2) 3)");
       Alcotest.(check string) "extra spaces are okay" "(1 2 3)" (interpret "'(1  2  3)");
+      Alcotest.(check string) "strings" "\"abc\"" (interpret "\"abc\"");
   end
 
   module Arithmetic = struct
@@ -74,12 +75,18 @@ module EvalTests = struct
         Alcotest.(check string) "cons of quoted list with empty list" "((1 2))" (interpret "(cons '(1 2) '())");
         Alcotest.(check string) "cons of number with non-empty list" "(1 2 3)" (interpret "(cons 1 '(2 3))");
         Alcotest.(check string) "cons of number with nested non-empty list" "(1 (1 1) 2)" (interpret "(cons 1 '('(1 1) 2))");
+        
+        Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
         (* Alcotest.(check string) "cdr should return empty list as tail of list with no element" "()" (interpret "(cdr '())"); *)
       end
+  end
 
-    let quoted () =
+  module If = struct
+    let operations () =
       begin
-        Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
+        Alcotest.(check string) "if clause with a true predicate should return the first expression" "1" (interpret "(if #t 1 2)");
+        (* Alcotest.(check string) "if clause with a tru-ish predicate should return the first expression" "1" (interpret "(if 42 1 2)"); *)
+        Alcotest.(check string) "if clause with a false predicate should return the second expression" "2" (interpret "(if #f 1 2)");
       end
   end
 
@@ -94,6 +101,6 @@ let () =
       "Logical disjunctions", `Quick, EvalTests.LogicalConnectives.disjunction;
       "Conditionals", `Quick, EvalTests.Conditional.operations;
       "List", `Quick, EvalTests.List.operations;
-      "Quoted list", `Quick, EvalTests.List.quoted;
+      "If", `Quick, EvalTests.If.operations;
     ]
   ]

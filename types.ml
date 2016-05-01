@@ -5,6 +5,7 @@ type token =
   Variable of string |
   Number of int |
   Boolean of bool |
+  String of string |
   Plus | Minus | Divide | Multiply | Modulo |
   LT | LTE | GT | GTE | EQ | NEQ |
   AND | OR |
@@ -53,6 +54,7 @@ let rec debug_string_of_token token =
   | Keyword kw -> "Keyword("^(string_of_keyword kw)^")"
   | Number s -> "Number("^(string_of_int s)^")"
   | Quote -> "Quote"
+  | String s -> "String("^s^")"
   | _ -> string_of_token token 
 and debug_string_of_tokens tokens =
   "["^(String.concat ", " (List.map (fun token -> debug_string_of_token token) tokens))^"]"
@@ -63,6 +65,7 @@ and string_of_token token =
   | Variable s -> s
   | Number s -> (string_of_int s)
   | Boolean s -> if s then "#t" else "#f"
+  | String s -> s
   | LParen -> "LParen"
   | RParen -> "RParen"
   | Plus -> "+"
