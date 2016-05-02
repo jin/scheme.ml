@@ -42,12 +42,13 @@ module EvalTests = struct
       begin
         Alcotest.(check string) "addition of two numbers" "3" (interpret "(+ 1 2)");
         Alcotest.(check string) "subtraction of a number from another number" "2" (interpret "(- 3 1)");
-        Alcotest.(check string) "Division with no remainder" "2" (interpret "(/ 4 2)");
-        Alcotest.(check string) "Division with remainder" "2" (interpret "(/ 5 2)");
-        Alcotest.(check string) "Multiplication" "10" (interpret "(* 5 2)");
-        Alcotest.(check string) "Modulo" "1" (interpret "(% 5 2)");
-        Alcotest.(check string) "Nested operations" "1" (interpret "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))");
-        Alcotest.(check string) "Nested operations" "980" (interpret "(+ 14 (* 23 42))")
+        Alcotest.(check string) "division with no remainder" "2" (interpret "(/ 4 2)");
+        Alcotest.(check string) "division with remainder" "2" (interpret "(/ 5 2)");
+        Alcotest.(check string) "multiplication" "10" (interpret "(* 5 2)");
+        Alcotest.(check string) "modulo" "1" (interpret "(% 5 2)");
+        Alcotest.(check string) "nested operations" "1" (interpret "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))");
+        Alcotest.(check string) "nested operations" "980" (interpret "(+ 14 (* 23 42))");
+        Alcotest.(check string) "nested operations" "57" (interpret "(+ (* 3 (+ (* 2 4) (+ 3 5))) (+ (- 10 7) 6))");
       end
 
     let comparisons () =
@@ -118,7 +119,6 @@ module EvalTests = struct
         Alcotest.(check string) "cons of number with nested non-empty list" "(1 (1 1) 2)" (interpret "(cons 1 '('(1 1) 2))");
         Alcotest.(check string) "nested list operations" "(2 3)" (interpret "(cdr (cons 1 '((* 1 2) (if (< 1 2) 3 4))))");
         Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
-        (* Alcotest.(check string) "cdr should return empty list as tail of list with no element" "()" (interpret "(cdr '())"); *)
       end
 
   end

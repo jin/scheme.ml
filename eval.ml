@@ -11,9 +11,9 @@ let is_true x =
   | Boolean b -> b
   | _ -> true
 
-let rec eval (sexpr: sexp) : token =
+let rec eval (sexpr: sexp) : value =
 
-  let eval_binary_op (op: token) (operands: sexp list) : token =
+  let eval_binary_op (op: value) (operands: sexp list) : value =
     if (List.length operands != 2) then raise Incorrect_argument_count
     else begin
       match (List.map eval operands) with
@@ -43,14 +43,14 @@ let rec eval (sexpr: sexp) : token =
       | _ -> raise Invalid_argument_types
     end in
 
-  let eval_conditional (op: token) (operands: sexp list) : token =
+  let eval_conditional (op: value) (operands: sexp list) : value =
     (* Lazy evaluation *)
     let predicate = eval (List.hd operands) in
     if (is_true predicate) then 
       (eval (List.hd (List.tl operands)))
     else (eval (List.hd (List.tl (List.tl operands)))) in
 
-  let eval_car (op: token) (operands: sexp list) =
+  let eval_car (op: value) (operands: sexp list) =
     match operands with
     | x::xs ->
       begin
@@ -60,7 +60,7 @@ let rec eval (sexpr: sexp) : token =
       end
     | _ -> raise Incorrect_argument_count in
 
-  let eval_cdr (op: token) (operands: sexp list) =
+  let eval_cdr (op: value) (operands: sexp list) =
     match operands with
     | x::xs ->
       begin
@@ -70,7 +70,7 @@ let rec eval (sexpr: sexp) : token =
       end
     | _ -> raise Incorrect_argument_count in
 
-  let eval_cons (op: token) (operands: sexp list) =
+  let eval_cons (op: value) (operands: sexp list) =
     match operands with
     (* atom or list -> empty list *)
     | [head; List(Atom(Quote)::tail)] ->
@@ -100,7 +100,7 @@ let rec eval (sexpr: sexp) : token =
           | Keyword Cdr -> eval_cdr op operands
           | Keyword Cons -> eval_cons op operands
           | Quote -> QuotedList (List.map eval operands)
-          | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_token op)))
+          | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_value op)))
         end
       | [] -> raise (Parser_exn "List cannot be empty")
     end
@@ -110,11 +110,11 @@ let print_debug prelude s = print_endline ("DEBUG: "^prelude^s)
 let interpret (s: string) : string =
   (* let _ = print_endline s in *)
   let lexbuf = Sedlexing.Utf8.from_string s in
-  let tokens = tokenize lexbuf in
-  (* let _ = print_debug "Tokens: " (debug_string_of_tokens tokens) in *)
-  let sexpr = parse_to_sexp tokens in
+  let values = tokenize lexbuf in
+  (* let _ = print_debug "values: " (debug_string_of_values values) in *)
+  let sexpr = parse_to_sexp values in
   (* let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in *)
-  (* let _ = print_debug "Result: " (string_of_token (eval sexpr)) in *)
+  (* let _ = print_debug "Result: " (string_of_value (eval sexpr)) in *)
   let result = eval sexpr in
-  string_of_token result
+  string_of_value result
 

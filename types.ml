@@ -1,5 +1,5 @@
-type token =
-  QuotedList of token list |
+type value =
+  QuotedList of value list |
   Symbol of string |
   Keyword of keyword |
   Variable of string |
@@ -16,7 +16,7 @@ and keyword =
   Car | Cdr | Cons | If | Cond
 
 (* S-expression type definition *)
-type sexp = Atom of token | List of sexp list
+type sexp = Atom of value | List of sexp list
 
 (* Debug functions *)
 
@@ -45,21 +45,21 @@ let keyword_of_string s =
   | "cond" -> Keyword(Cond)
   | _ -> raise Unknown_keyword
 
-let rec debug_string_of_token token =
-  match token with
-  | QuotedList tokens ->  
-    "'("^(String.concat ", " (List.map (fun token -> string_of_token token) tokens))^")"
+let rec debug_string_of_value value =
+  match value with
+  | QuotedList values ->  
+    "'("^(String.concat ", " (List.map (fun value -> string_of_value value) values))^")"
   | Symbol s -> "Symbol("^s^")"
   | Variable s -> "Variable("^s^")"
   | Keyword kw -> "Keyword("^(string_of_keyword kw)^")"
   | Number s -> "Number("^(string_of_int s)^")"
   | Quote -> "Quote"
   | String s -> "String("^s^")"
-  | _ -> string_of_token token 
-and debug_string_of_tokens tokens =
-  "["^(String.concat ", " (List.map (fun token -> debug_string_of_token token) tokens))^"]"
-and string_of_token token =
-  match token with
+  | _ -> string_of_value value 
+and debug_string_of_values values =
+  "["^(String.concat ", " (List.map (fun value -> debug_string_of_value value) values))^"]"
+and string_of_value value =
+  match value with
   | Symbol s -> s
   | Keyword kw -> string_of_keyword kw
   | Variable s -> s
@@ -83,12 +83,12 @@ and string_of_token token =
   | AND -> "and"
   | OR -> "or"
   | Quote -> "'"
-  | QuotedList tokens ->  
-    "("^(String.concat " " (List.map (fun token -> string_of_token token) tokens))^")"
-and string_of_tokens tokens =
-  "["^(String.concat " " (List.map (fun token -> string_of_token token) tokens))^"]"
+  | QuotedList values ->  
+    "("^(String.concat " " (List.map (fun value -> string_of_value value) values))^")"
+and string_of_values values =
+  "["^(String.concat " " (List.map (fun value -> string_of_value value) values))^"]"
 
 let rec string_of_sexp sexpr =
   match sexpr with
-  | Atom x -> "Atom("^(string_of_token x)^")"
+  | Atom x -> "Atom("^(string_of_value x)^")"
   | List xs -> "List("^(String.concat " " (List.map string_of_sexp xs))^")"

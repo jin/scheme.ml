@@ -19,7 +19,7 @@ exception Lexer_failure
 exception Unexpected_character of string
 
 (* Lexing function *)
-let tokenize (buf: Sedlexing.lexbuf) : token list =
+let tokenize (buf: Sedlexing.lexbuf) : value list =
   let rec aux buf tokens =
     match%sedlex buf with
     | white_space -> aux buf tokens
