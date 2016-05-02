@@ -7,13 +7,13 @@ let empty_list = List([Atom(Quote)])
 exception Parser_exn of string
 exception Incorrect_argument_count
 exception Invalid_argument_types
-exception Parantheses_mismatch
+exception Parentheses_mismatch
 
 (* Convert a list of tokens into an s-expression *)
 let parse_to_sexp (tokens: token list) =
   let rec sexp_of_list tokens sexpr =
     match tokens with
-    | [] -> raise Parantheses_mismatch
+    | [] -> raise Parentheses_mismatch
     | RParen::rem_tokens -> (List sexpr, rem_tokens)
     | Quote::LParen::rem_tokens -> 
       begin
@@ -33,6 +33,7 @@ let parse_to_sexp (tokens: token list) =
     | LParen::rem_tokens ->
       let (list_sexpr, rem_tokens) = sexp_of_list rem_tokens [] in
       aux rem_tokens (sexpr@[list_sexpr])
+    | RParen::_ -> raise Parentheses_mismatch
     | Quote::rem_tokens ->
       let (list_sexpr, rem_tokens) = sexp_of_list toks [] in
       aux rem_tokens (sexpr@[list_sexpr])

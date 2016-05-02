@@ -2,18 +2,33 @@ module EvalTests = struct
 
   let interpret = Eval.interpret
 
+  module Errors = struct
+    open Parser
+
+    let operations () =
+      begin
+        Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret "("; ());
+        Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret ")"; ());
+        (* Alcotest.check_raises "mismatched parentheses" Parantheses_mismatch (fun () -> interpret "(()"; ()); *)
+        (* Alcotest.check_raises "mismatched parentheses" Parantheses_mismatch (fun () -> interpret "())"; ()); *)
+      end
+  end
+
   module Basic = struct
     let operations () =
-      Alcotest.(check string) "positive integer" "3" (interpret "3");
-      Alcotest.(check string) "negative integer" "-3" (interpret "-3");
-      Alcotest.(check string) "empty list" "()" (interpret "'()");
-      Alcotest.(check string) "true" "#t" (interpret "#t");
-      Alcotest.(check string) "false" "#f" (interpret "#f");
-      Alcotest.(check string) "list with one element" "(1)" (interpret "'(1)");
-      Alcotest.(check string) "list with two elements" "(1 2)" (interpret "'(1 2)");
-      Alcotest.(check string) "list with nested elements" "((1 2) 3)" (interpret "'('(1 2) 3)");
-      Alcotest.(check string) "extra spaces are okay" "(1 2 3)" (interpret "'(1  2  3)");
-      Alcotest.(check string) "strings" "\"abc\"" (interpret "\"abc\"");
+      begin
+        Alcotest.(check string) "positive integer" "3" (interpret "3");
+        Alcotest.(check string) "negative integer" "-3" (interpret "-3");
+        Alcotest.(check string) "empty list" "()" (interpret "'()");
+        Alcotest.(check string) "true" "#t" (interpret "#t");
+        Alcotest.(check string) "false" "#f" (interpret "#f");
+        Alcotest.(check string) "list with one element" "(1)" (interpret "'(1)");
+        Alcotest.(check string) "list with two elements" "(1 2)" (interpret "'(1 2)");
+        Alcotest.(check string) "list with nested elements" "((1 2) 3)" (interpret "'('(1 2) 3)");
+        Alcotest.(check string) "list with elements of different types" "((\"abc\" 2) 3)" (interpret "'('(\"abc\" 2) 3)");
+        Alcotest.(check string) "extra spaces are okay" "(1 2 3)" (interpret "'(1  2  3)");
+        Alcotest.(check string) "strings" "\"abc\"" (interpret "\"abc\"");
+      end
   end
 
   module Arithmetic = struct
@@ -25,7 +40,8 @@ module EvalTests = struct
         Alcotest.(check string) "Division with remainder" "2" (interpret "(/ 5 2)");
         Alcotest.(check string) "Multiplication" "10" (interpret "(* 5 2)");
         Alcotest.(check string) "Modulo" "1" (interpret "(% 5 2)");
-        Alcotest.(check string) "Composed operations" "1" (interpret "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))")
+        Alcotest.(check string) "Nested operations" "1" (interpret "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))");
+        Alcotest.(check string) "Nested operations" "980" (interpret "(+ 14 (* 23 42))")
       end
 
     let comparisons () =
@@ -94,7 +110,7 @@ module EvalTests = struct
         Alcotest.(check string) "cons of quoted list with empty list" "((1 2))" (interpret "(cons '(1 2) '())");
         Alcotest.(check string) "cons of number with non-empty list" "(1 2 3)" (interpret "(cons 1 '(2 3))");
         Alcotest.(check string) "cons of number with nested non-empty list" "(1 (1 1) 2)" (interpret "(cons 1 '('(1 1) 2))");
-        
+        Alcotest.(check string) "nested list operations" "(2 3)" (interpret "(cdr (cons 1 '((* 1 2) (if (< 1 2) 3 4))))");
         Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
         (* Alcotest.(check string) "cdr should return empty list as tail of list with no element" "()" (interpret "(cdr '())"); *)
       end
@@ -103,8 +119,9 @@ module EvalTests = struct
 end
 
 let () =
-  Alcotest.run "All tests" [
+  Alcotest.run "all tests" [
     "Eval tests", [
+      "Errors", `Quick, EvalTests.Errors.operations;
       "Language basic syntax", `Quick, EvalTests.Basic.operations;
       "Arithmetic operations", `Quick, EvalTests.Arithmetic.operations;
       "Arithmetic comparisons", `Quick, EvalTests.Arithmetic.comparisons;
