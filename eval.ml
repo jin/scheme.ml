@@ -83,6 +83,21 @@ let rec eval (sexpr: sexp) : value =
       end
     | _ -> raise Incorrect_argument_count in
 
+  let eval_keyword op operands =
+    match op with 
+    | Keyword "if" -> eval_conditional op operands
+    | Keyword "car" -> eval_car op operands
+    | Keyword "cdr" -> eval_cdr op operands
+    | Keyword "cons" -> eval_cons op operands
+    | Keyword "quote" -> 
+      begin
+        match operands with
+        | [List s] -> QuotedList (List.map eval s)
+        | [x] -> QuotedList ([eval x])
+        | _ -> raise (Eval_exn "Cannot form quoted list")
+      end 
+   | _ -> raise (Eval_exn "Not a keyword") in
+
   match sexpr with
   | Atom x -> x
   | List x ->
@@ -95,10 +110,7 @@ let rec eval (sexpr: sexp) : value =
           | Plus | Minus | Multiply | Divide | Modulo
           | EQ | NEQ | LT | LTE | GT | GTE
           | AND | OR -> eval_binary_op op operands
-          | Keyword If -> eval_conditional op operands
-          | Keyword Car -> eval_car op operands
-          | Keyword Cdr -> eval_cdr op operands
-          | Keyword Cons -> eval_cons op operands
+          | Keyword _ -> eval_keyword op operands
           | Quote -> QuotedList (List.map eval operands)
           | _ -> raise (Parser_exn ("Cannot parse operator: "^(string_of_value op)))
         end

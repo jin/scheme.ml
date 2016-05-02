@@ -8,7 +8,7 @@ let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Opt '-', Plus digit]
 let variable = [%sedlex.regexp? letter, Star letter]
 let symbol = [%sedlex.regexp? '\'', letter, Star letter]
-let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" ]
+let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" | "quote" ]
 let some_string = [%sedlex.regexp? '"', letter, Plus (letter | digit), '"' ]
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
@@ -43,7 +43,7 @@ let tokenize (buf: Sedlexing.lexbuf) : value list =
     | number -> aux buf (tokens@[Number (int_of_string (lexeme buf))])
     | boolean -> aux buf (tokens@[Boolean (boolean_of_string (lexeme buf))])
     | symbol -> aux buf (tokens@[Symbol (lexeme buf)])
-    | keyword -> aux buf (tokens@[keyword_of_string (lexeme buf)])
+    | keyword -> aux buf (tokens@[Keyword (lexeme buf)])
     | variable -> aux buf (tokens@[Variable (lexeme buf)])
     | eof -> tokens
     | any -> raise (Unexpected_character (lexeme buf))

@@ -119,6 +119,7 @@ module EvalTests = struct
         Alcotest.(check string) "cons of number with nested non-empty list" "(1 (1 1) 2)" (interpret "(cons 1 '('(1 1) 2))");
         Alcotest.(check string) "nested list operations" "(2 3)" (interpret "(cdr (cons 1 '((* 1 2) (if (< 1 2) 3 4))))");
         Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
+        Alcotest.(check string) "Declare a quoted list with the quote operation" "(1 2 3)" (interpret "(quote (1 2 3))");
       end
 
   end

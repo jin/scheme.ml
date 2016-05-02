@@ -1,7 +1,7 @@
 type value =
   QuotedList of value list |
   Symbol of string |
-  Keyword of keyword |
+  Keyword of string |
   Variable of string |
   Number of int |
   Boolean of bool |
@@ -12,8 +12,6 @@ type value =
   LParen | RParen | (* TODO: Get rid of this *)
   Quote |
   EOF
-and keyword =
-  Car | Cdr | Cons | If | Cond
 
 (* S-expression type definition *)
 type sexp = Atom of value | List of sexp list
@@ -28,30 +26,13 @@ let boolean_of_string s =
 
 exception Unknown_keyword
 
-let string_of_keyword keyword =
-  match keyword with
-  | Car -> "car"
-  | Cdr -> "cdr"
-  | Cons -> "cons"
-  | If -> "if"
-  | Cond -> "cond"
-
-let keyword_of_string s =
-  match s with
-  | "car" -> Keyword(Car)
-  | "cdr" -> Keyword(Cdr)
-  | "cons" -> Keyword(Cons)
-  | "if" -> Keyword(If)
-  | "cond" -> Keyword(Cond)
-  | _ -> raise Unknown_keyword
-
 let rec debug_string_of_value value =
   match value with
   | QuotedList values ->  
     "'("^(String.concat ", " (List.map (fun value -> string_of_value value) values))^")"
   | Symbol s -> "Symbol("^s^")"
   | Variable s -> "Variable("^s^")"
-  | Keyword kw -> "Keyword("^(string_of_keyword kw)^")"
+  | Keyword kw -> "Keyword("^kw^")"
   | Number s -> "Number("^(string_of_int s)^")"
   | Quote -> "Quote"
   | String s -> "String("^s^")"
@@ -61,7 +42,7 @@ and debug_string_of_values values =
 and string_of_value value =
   match value with
   | Symbol s -> s
-  | Keyword kw -> string_of_keyword kw
+  | Keyword kw -> kw
   | Variable s -> s
   | Number s -> (string_of_int s)
   | Boolean s -> if s then "#t" else "#f"
