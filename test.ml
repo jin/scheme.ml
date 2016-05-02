@@ -1,18 +1,24 @@
-module EvalTests = struct
+module ErrorTests = struct
 
   let interpret = Eval.interpret
 
-  module Errors = struct
+  module Parsing = struct
     open Parser
 
     let operations () =
       begin
         Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret "("; ());
         Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret ")"; ());
-        (* Alcotest.check_raises "mismatched parentheses" Parantheses_mismatch (fun () -> interpret "(()"; ()); *)
-        (* Alcotest.check_raises "mismatched parentheses" Parantheses_mismatch (fun () -> interpret "())"; ()); *)
+        Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret "(()"; ());
+        Alcotest.check_raises "mismatched parentheses" Parentheses_mismatch (fun () -> interpret "())"; ());
       end
   end
+
+end
+
+module EvalTests = struct
+
+  let interpret = Eval.interpret
 
   module Basic = struct
     let operations () =
@@ -121,7 +127,6 @@ end
 let () =
   Alcotest.run "all tests" [
     "Eval tests", [
-      "Errors", `Quick, EvalTests.Errors.operations;
       "Language basic syntax", `Quick, EvalTests.Basic.operations;
       "Arithmetic operations", `Quick, EvalTests.Arithmetic.operations;
       "Arithmetic comparisons", `Quick, EvalTests.Arithmetic.comparisons;
@@ -129,5 +134,8 @@ let () =
       "Logical disjunctions", `Quick, EvalTests.LogicalConnectives.disjunction;
       "Conditionals", `Quick, EvalTests.Conditional.operations;
       "List", `Quick, EvalTests.List.operations;
+    ];
+    "Error tests", [
+      "Parser errors", `Quick, ErrorTests.Parsing.operations;
     ]
   ]
