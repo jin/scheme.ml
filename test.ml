@@ -27,6 +27,22 @@ module EvalTests = struct
         Alcotest.(check string) "Modulo" "1" (interpret "(% 5 2)");
         Alcotest.(check string) "Composed operations" "1" (interpret "(- (+ (* 2 (/ 4 2)) (- 2 3)) (% 5 3))")
       end
+
+    let comparisons () =
+      begin 
+        Alcotest.(check string) "less than" "#t" (interpret "(< 1 2)");
+        Alcotest.(check string) "less than" "#f" (interpret "(< 2 2)");
+        Alcotest.(check string) "more than" "#t" (interpret "(> 5 2)");
+        Alcotest.(check string) "more than" "#f" (interpret "(> 2 2)");
+        Alcotest.(check string) "less than or equals" "#t" (interpret "(<= 2 2)");
+        Alcotest.(check string) "less than or equals" "#f" (interpret "(<= 3 2)");
+        Alcotest.(check string) "more than or equals" "#t" (interpret "(>= 2 2)");
+        Alcotest.(check string) "more than or equals" "#f" (interpret "(>= 1 2)");
+        Alcotest.(check string) "equals" "#t" (interpret "(= 1 1)");
+        Alcotest.(check string) "equals" "#f" (interpret "(= 1 2)");
+        Alcotest.(check string) "not equals" "#t" (interpret "(\\= 1 2)");
+        Alcotest.(check string) "not equals" "#f" (interpret "(\\= 1 1)");
+      end
   end
 
   module LogicalConnectives = struct
@@ -82,8 +98,8 @@ module EvalTests = struct
         Alcotest.(check string) "Quoted list prevents evaluation" "(+ 1 2)" (interpret "'(+ 1 2)");
         (* Alcotest.(check string) "cdr should return empty list as tail of list with no element" "()" (interpret "(cdr '())"); *)
       end
-  end
 
+  end
 end
 
 let () =
@@ -91,6 +107,7 @@ let () =
     "Eval tests", [
       "Language basic syntax", `Quick, EvalTests.Basic.operations;
       "Arithmetic operations", `Quick, EvalTests.Arithmetic.operations;
+      "Arithmetic comparisons", `Quick, EvalTests.Arithmetic.comparisons;
       "Logical conjunctions", `Quick, EvalTests.LogicalConnectives.conjunction;
       "Logical disjunctions", `Quick, EvalTests.LogicalConnectives.disjunction;
       "Conditionals", `Quick, EvalTests.Conditional.operations;
