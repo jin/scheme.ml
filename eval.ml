@@ -93,7 +93,7 @@ let rec eval (sexpr: sexp) : value =
       begin
         match operands with
         | [List s] -> QuotedList (List.map eval s)
-        | [x] -> QuotedList ([eval x])
+        | [x] -> eval x
         | _ -> raise (Eval_exn "Cannot form quoted list")
       end 
    | _ -> raise (Eval_exn "Not a keyword") in
