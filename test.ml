@@ -89,7 +89,7 @@ module EvalTests = struct
     let operations () = 
       begin
         Alcotest.(check string) "if clause with a true predicate should return the first expression" "1" (interpret "(if #t 1 2)");
-        (* Alcotest.(check string) "if clause with a tru-ish predicate should return the first expression" "1" (interpret "(if 42 1 2)"); *)
+        Alcotest.(check string) "if clause with a tru-ish predicate should return the first expression" "1" (interpret "(if 42 1 2)");
         Alcotest.(check string) "if clause with a false predicate should return the second expression" "2" (interpret "(if #f 1 2)");
         Alcotest.(check string) "if <" "4" (interpret "(if (< 1 2) 4 5)");
         Alcotest.(check string) "if >" "2" (interpret "(if (> 1 2) (* 2 2) (/ 5 2))");

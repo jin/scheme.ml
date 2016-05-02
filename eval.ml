@@ -6,6 +6,11 @@ open Types
 exception Eval_exn of string
 exception Not_function
 
+let is_true x = 
+  match x with
+  | Boolean b -> b
+  | _ -> true
+
 let rec eval (sexpr: sexp) : token =
 
   let eval_binary_op (op: token) (operands: sexp list) : token =
@@ -41,11 +46,9 @@ let rec eval (sexpr: sexp) : token =
   let eval_conditional (op: token) (operands: sexp list) : token =
     (* Lazy evaluation *)
     let predicate = eval (List.hd operands) in
-    match predicate with
-    | Boolean b ->
-      if b then (eval (List.hd (List.tl operands)))
-      else (eval (List.hd (List.tl (List.tl operands))))
-    | _ -> raise (Parser_exn "Predicate is required for conditionals") in
+    if (is_true predicate) then 
+      (eval (List.hd (List.tl operands)))
+    else (eval (List.hd (List.tl (List.tl operands)))) in
 
   let eval_car (op: token) (operands: sexp list) =
     match operands with
