@@ -9,7 +9,7 @@ let number = [%sedlex.regexp? Opt '-', Plus digit]
 let variable = [%sedlex.regexp? Plus letter]
 let symbol = [%sedlex.regexp? '\'', Plus letter]
 let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" | "quote" ]
-let some_string = [%sedlex.regexp? '"', Star(Compl ('"')), '"']
+let some_string = [%sedlex.regexp? '"', Star(Compl ('"') | "\\\""), '"']
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 

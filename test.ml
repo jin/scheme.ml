@@ -36,7 +36,7 @@ module EvalTests = struct
         Alcotest.(check string) "some russian (unicode)" "\"Съешь же ещё этих мягких французских булок да выпей чаю\"" (interpret "\"Съешь же ещё этих мягких французских булок да выпей чаю\"");
         Alcotest.(check string) "ascii strings" "\"The quick brown fox jumps over the lazy dog 0123456789 !@#$%^&*();':[]{}<>,./\|`~\"" (interpret "\"The quick brown fox jumps over the lazy dog 0123456789 !@#$%^&*();':[]{}<>,./\|`~\"");
         Alcotest.(check string) "empty strings" "\"\"" (interpret "\"\"");
-        (* Alcotest.(check string) "character escaping" "\"\"\"" (interpret "\"\"\""); *)
+        Alcotest.(check string) "character escaping" "\"\\\" abc \\\"\"" (interpret "\"\\\" abc \\\"\"");
       end
   end
 
