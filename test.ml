@@ -33,7 +33,10 @@ module EvalTests = struct
         Alcotest.(check string) "list with nested elements" "((1 2) 3)" (interpret "'('(1 2) 3)");
         Alcotest.(check string) "list with elements of different types" "((\"abc\" 2) 3)" (interpret "'('(\"abc\" 2) 3)");
         Alcotest.(check string) "extra spaces are okay" "(1 2 3)" (interpret "'(1  2  3)");
-        Alcotest.(check string) "strings" "\"abc\"" (interpret "\"abc\"");
+        Alcotest.(check string) "some russian (unicode)" "\"Съешь же ещё этих мягких французских булок да выпей чаю\"" (interpret "\"Съешь же ещё этих мягких французских булок да выпей чаю\"");
+        Alcotest.(check string) "ascii strings" "\"The quick brown fox jumps over the lazy dog 0123456789 !@#$%^&*();':[]{}<>,./\|`~\"" (interpret "\"The quick brown fox jumps over the lazy dog 0123456789 !@#$%^&*();':[]{}<>,./\|`~\"");
+        Alcotest.(check string) "empty strings" "\"\"" (interpret "\"\"");
+        (* Alcotest.(check string) "character escaping" "\"\"\"" (interpret "\"\"\""); *)
       end
   end
 
@@ -123,6 +126,7 @@ module EvalTests = struct
         Alcotest.(check string) "Declare a quoted datum with the quote operation" "'a" (interpret "(quote 'a)");
         Alcotest.(check string) "Declare a quoted list with the quote operation" "(1)" (interpret "(quote (1))");
         Alcotest.(check string) "Declare a quoted list with the quote operation" "(1 2 3)" (interpret "(quote (1 2 3))");
+        (* Alcotest.(check string) "Declare a quoted nested list with the quote operation" "(1 (2 3) 4)" (interpret "(quote (1 (2 3) 4))"); *)
       end
 
   end

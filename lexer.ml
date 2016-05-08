@@ -6,10 +6,10 @@ let arithmetic_op = [%sedlex.regexp? "+" | "-" | "*" | "/" | "%" ]
 let boolean = [%sedlex.regexp? "#t" | "#f" ]
 let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Opt '-', Plus digit]
-let variable = [%sedlex.regexp? letter, Star letter]
-let symbol = [%sedlex.regexp? '\'', letter, Star letter]
+let variable = [%sedlex.regexp? Plus letter]
+let symbol = [%sedlex.regexp? '\'', Plus letter]
 let keyword = [%sedlex.regexp? "if" | "car" | "cdr" | "cons" | "quote" ]
-let some_string = [%sedlex.regexp? '"', letter, Plus (letter | digit), '"' ]
+let some_string = [%sedlex.regexp? '"', Star(Compl ('"')), '"']
 
 let lexeme (buf: Sedlexing.lexbuf) = Sedlexing.Utf8.lexeme buf
 
