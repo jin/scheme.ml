@@ -22,3 +22,9 @@ setup.log
 bin/
 scheme
 _tests/
+
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-scheme.ml
+bazel-testlogs

@@ -36,11 +36,21 @@ DEBUG: Result: (2, 3)
 # install dependencies
 opam install sedlex alcotest
 
-# build the binary
+# Build with either Make or [Bazel](https://bazel.io)
+
+# MAKE
 make
 
 # run all examples and diffs output against respective expected output in examples/test
 make test
+
+# ----
+
+# Bazel
+
+bazel build //:scheme-bytecode # compiles the binary into bazel-bin/scheme-bytecode
+
+# ----
 
 # start the interpreter
 ./scheme
@@ -53,7 +63,7 @@ make test
 
 In the order of features I want to look into.
 
-- [ ] Separation of eval logic from lexer/parser more
+- [ ] More separation of eval logic from lexer/parser
 - [x] Binary should accept filenames and not read from STDIN
 - [ ] `cond`
 - [ ] Lambdas
