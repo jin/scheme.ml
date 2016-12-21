@@ -1,8 +1,7 @@
 module ErrorTests = struct
 
-  let interpret = Eval.interpret
-
   module Parsing = struct
+    open Interpreter
     open Parser
 
     let operations () =
@@ -18,7 +17,7 @@ end
 
 module EvalTests = struct
 
-  let interpret = Eval.interpret
+  open Interpreter
 
   let check = Alcotest.(check string)
 
@@ -57,7 +56,7 @@ module EvalTests = struct
       end
 
     let comparisons () =
-      begin 
+      begin
         check "less than" "#t" (interpret "(< 1 2)");
         check "less than" "#f" (interpret "(< 2 2)");
         check "more than" "#t" (interpret "(> 5 2)");
@@ -74,7 +73,7 @@ module EvalTests = struct
   end
 
   module LogicalConnectives = struct
-    let conjunction () = 
+    let conjunction () =
       begin
         check "Conjunction TT" "#t" (interpret "(and #t #t)");
         check "Conjunction TF" "#f" (interpret "(and #t #f)");
@@ -82,7 +81,7 @@ module EvalTests = struct
         check "Conjunction FF" "#f" (interpret "(and #f #f)")
       end
 
-    let disjunction () = 
+    let disjunction () =
       begin
         check "Disjunction TT" "#t" (interpret "(or #t #t)");
         check "Disjunction TF" "#t" (interpret "(or #t #f)");
@@ -92,7 +91,7 @@ module EvalTests = struct
   end
 
   module Conditional = struct
-    let operations () = 
+    let operations () =
       begin
         check "if clause with a true predicate should return the first expression" "1" (interpret "(if #t 1 2)");
         check "if clause with a tru-ish predicate should return the first expression" "1" (interpret "(if 42 1 2)");
@@ -107,7 +106,7 @@ module EvalTests = struct
   end
 
   module List = struct
-    let operations () = 
+    let operations () =
       begin
         check "car of quoted list" "1" (interpret "(car '(1 2 3))");
         check "car of quoted list" "'a" (interpret "(car '('a 'b 'c))");

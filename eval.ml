@@ -118,15 +118,3 @@ let rec eval (sexpr: sexp) : value =
     end
 
 let print_debug prelude s = print_endline ("DEBUG: "^prelude^s)
-
-let interpret (s: string) : string =
-  (* let _ = print_endline s in *)
-  let lexbuf = Sedlexing.Utf8.from_string s in
-  let values = tokenize lexbuf in
-  (* let _ = print_debug "values: " (debug_string_of_values values) in *)
-  let sexpr = parse_to_sexp values in
-  (* let _ = print_debug "S-Expression: " (string_of_sexp sexpr) in *)
-  (* let _ = print_debug "Result: " (string_of_value (eval sexpr)) in *)
-  let result = eval sexpr in
-  string_of_value result
-
