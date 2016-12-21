@@ -1,13 +1,26 @@
 load("@io_bazel_rules_ocaml//ocaml:ocaml.bzl", "ocaml_native_binary", "ocaml_bytecode_binary")
 
+filegroup(
+    name = "srcs",
+    srcs = [
+        "eval.ml",
+        "lexer.ml",
+        "parser.ml",
+        "scheme.ml",
+        "types.ml",
+    ],
+)
+
 ocaml_bytecode_binary(
     name = "scheme-bytecode",
-    src = "scheme.ml",
+    srcs = [":srcs"],
+    src_root = "scheme.ml",
     opam_pkgs = ["sedlex"],
 )
 
 ocaml_native_binary(
     name = "scheme-native",
-    src = "scheme.ml",
+    srcs = [":srcs"],
+    src_root = "scheme.ml",
     opam_pkgs = ["sedlex"],
 )
