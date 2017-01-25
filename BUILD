@@ -8,6 +8,8 @@ filegroup(
         "parser.ml",
         "scheme.ml",
         "types.ml",
+        "interpreter.ml",
+        "util.ml",
     ],
 )
 
@@ -15,12 +17,12 @@ ocaml_bytecode_binary(
     name = "scheme-bytecode",
     srcs = [":srcs"],
     src_root = "scheme.ml",
-    opam_pkgs = ["sedlex"],
+    opam_packages = ["sedlex"],
 )
 
 ocaml_native_binary(
     name = "scheme-native",
     srcs = [":srcs"],
     src_root = "scheme.ml",
-    opam_pkgs = ["sedlex"],
+    opam_packages = ["sedlex"],
 )
