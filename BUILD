@@ -26,3 +26,9 @@ ocaml_native_binary(
     src_root = "scheme.ml",
     opam_packages = ["sedlex"],
 )
+
+ocaml_native_binary(
+    name = "types",
+    srcs = ["types.ml"],
+    src_root = "types.ml",
+)
