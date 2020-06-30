@@ -1,7 +1,10 @@
-git_repository(
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
     name = "io_bazel_rules_ocaml",
-    remote = "https://github.com/jin/rules_ocaml.git",
-    commit = "7a0a6e5226af5f09eb6e3379b901d8f2ffdb8bbf",
+    urls = ["https://github.com/jin/rules_ocaml/archive/737e7fa92681a9dd0e1e99496476a2bdcc25f56a.tar.gz"],
+    strip_prefix = "rules_ocaml-737e7fa92681a9dd0e1e99496476a2bdcc25f56a",
+    sha256 = "245d8b21fb671d181d5402ddfe7c9d4f7a0d51d8b10adb26bf15b52b39f29620",
 )
 
 load("@io_bazel_rules_ocaml//ocaml:repo.bzl", "ocaml_repositories")
